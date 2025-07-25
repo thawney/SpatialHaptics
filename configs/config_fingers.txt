@@ -1,0 +1,26 @@
+# Custom 10-Transducer Mirrored Layout Configuration
+# Dimensions from drawing show distances from center (0,0)
+# Left side is exact mirror: -X of right side positions
+# Note: This uses custom channel assignments, not the standard grid mapping
+
+config_name = fingers
+method = tactile_grid
+
+# Right side transducers (using dimensions from drawing)
+# X coordinates are the mm values from drawing ÷ 1000
+SPEAKER R1  0.0200,0.0000   CHANNEL=5 DESCRIPTION="Right 20mm from center, 0mm Y"
+SPEAKER R2  0.027246,0.044413   CHANNEL=6 DESCRIPTION="Right ~41mm from center"
+SPEAKER R3  0.061484,0.055537  CHANNEL=7 DESCRIPTION="Right ~58mm from center"
+SPEAKER R4  0.097244,0.051385   CHANNEL=8 DESCRIPTION="Right ~77mm from center"
+SPEAKER R5  0.135099,0.033192  CHANNEL=9 DESCRIPTION="Right bottom position"
+
+# Left side transducers (exact mirror: negative X coordinates)
+SPEAKER L1 -0.0200,0.0000   CHANNEL=4 DESCRIPTION="Left 20mm from center, 0mm Y"
+SPEAKER L2 -0.027246,0.044413   CHANNEL=3 DESCRIPTION="Left ~41mm from center"
+SPEAKER L3 -0.061484,0.055537  CHANNEL=2 DESCRIPTION="Left ~58mm from center"
+SPEAKER L4 -0.097244,0.051385   CHANNEL=1 DESCRIPTION="Left ~77mm from center"
+SPEAKER L5 -0.135099,0.033192  CHANNEL=0 DESCRIPTION="Left bottom position"
+
+# Note: This configuration uses custom channel assignments
+# For standard 4x4 grid with Thawney's board, use config_4x4_grid.txt
+    

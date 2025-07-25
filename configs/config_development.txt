@@ -1,0 +1,11 @@
+# Development Configuration
+# Minimal setup for testing and development
+
+config_name = development
+method = distance_pan
+
+# Just 4 speakers for easy testing
+SPEAKER TL -0.02,0.02 CHANNEL=0 DESCRIPTION="Top left"
+SPEAKER TR  0.02,0.02 CHANNEL=1 DESCRIPTION="Top right"
+SPEAKER BL -0.02,-0.02 CHANNEL=2 DESCRIPTION="Bottom left"
+SPEAKER BR  0.02,-0.02 CHANNEL=3 DESCRIPTION="Bottom right"

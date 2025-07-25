@@ -1,0 +1,362 @@
+# Finger Piano Fun Demo - 10 Finger Tactile Layout
+# A playful demonstration for the finger tactile transducer setup
+# Features piano-like sequences, rhythmic patterns, and interactive-feeling effects
+
+# Configuration optimized for fingertip tactile perception
+itd_exaggeration = 6.0
+ild_exponent = 4.0
+tone_duration = 0.12
+
+# ========================================
+# SECTION 1: WELCOME SEQUENCE
+# ========================================
+
+# Welcome with center reference point
+SOUND 0.0,0.0 FREQ=300 AMP=0.6
+WAIT 0.8
+
+# Quick left-to-right finger introduction
+SOUND -0.135099,0.033192 FREQ=200 AMP=0.5  # Left pinky
+WAIT 0.15
+SOUND -0.097244,0.051385 FREQ=220 AMP=0.5  # Left ring
+WAIT 0.15
+SOUND -0.061484,0.055537 FREQ=240 AMP=0.5  # Left middle
+WAIT 0.15
+SOUND -0.027246,0.044413 FREQ=260 AMP=0.5  # Left index
+WAIT 0.15
+SOUND -0.0200,0.0000 FREQ=280 AMP=0.5      # Left thumb
+WAIT 0.3
+SOUND 0.0200,0.0000 FREQ=300 AMP=0.5       # Right thumb
+WAIT 0.15
+SOUND 0.027246,0.044413 FREQ=320 AMP=0.5   # Right index
+WAIT 0.15
+SOUND 0.061484,0.055537 FREQ=340 AMP=0.5   # Right middle
+WAIT 0.15
+SOUND 0.097244,0.051385 FREQ=360 AMP=0.5   # Right ring
+WAIT 0.15
+SOUND 0.135099,0.033192 FREQ=380 AMP=0.5   # Right pinky
+
+WAIT 1.0
+
+# ========================================
+# SECTION 2: FINGER PIANO MELODY
+# ========================================
+
+# Play a simple melody using finger positions like piano keys
+# C major scale ascending
+SOUND -0.135099,0.033192 FREQ=261 AMP=0.6  # C (Left pinky)
+WAIT 0.4
+SOUND -0.097244,0.051385 FREQ=293 AMP=0.6  # D (Left ring)
+WAIT 0.4
+SOUND -0.061484,0.055537 FREQ=329 AMP=0.6  # E (Left middle)
+WAIT 0.4
+SOUND -0.027246,0.044413 FREQ=349 AMP=0.6  # F (Left index)
+WAIT 0.4
+SOUND -0.0200,0.0000 FREQ=392 AMP=0.6      # G (Left thumb)
+WAIT 0.4
+SOUND 0.0200,0.0000 FREQ=440 AMP=0.6       # A (Right thumb)
+WAIT 0.4
+SOUND 0.027246,0.044413 FREQ=493 AMP=0.6   # B (Right index)
+WAIT 0.4
+SOUND 0.061484,0.055537 FREQ=523 AMP=0.6   # C (Right middle)
+
+WAIT 0.8
+
+# Play it back descending
+SOUND 0.061484,0.055537 FREQ=523 AMP=0.6   # C
+WAIT 0.3
+SOUND 0.027246,0.044413 FREQ=493 AMP=0.6   # B
+WAIT 0.3
+SOUND 0.0200,0.0000 FREQ=440 AMP=0.6       # A
+WAIT 0.3
+SOUND -0.0200,0.0000 FREQ=392 AMP=0.6      # G
+WAIT 0.3
+SOUND -0.027246,0.044413 FREQ=349 AMP=0.6  # F
+WAIT 0.3
+SOUND -0.061484,0.055537 FREQ=329 AMP=0.6  # E
+WAIT 0.3
+SOUND -0.097244,0.051385 FREQ=293 AMP=0.6  # D
+WAIT 0.3
+SOUND -0.135099,0.033192 FREQ=261 AMP=0.6  # C
+
+WAIT 1.0
+
+# ========================================
+# SECTION 3: TYPING RHYTHM PATTERN
+# ========================================
+
+# Simulate fast typing with alternating hands
+tone_duration = 0.08
+
+# Left hand pattern
+SOUND -0.061484,0.055537 FREQ=300 AMP=0.4  # Left middle
+WAIT 0.12
+SOUND -0.027246,0.044413 FREQ=320 AMP=0.4  # Left index
+WAIT 0.12
+SOUND 0.027246,0.044413 FREQ=340 AMP=0.4   # Right index
+WAIT 0.12
+SOUND 0.061484,0.055537 FREQ=320 AMP=0.4   # Right middle
+WAIT 0.12
+
+# Repeat typing pattern faster
+SOUND -0.097244,0.051385 FREQ=280 AMP=0.4  # Left ring
+WAIT 0.1
+SOUND 0.097244,0.051385 FREQ=360 AMP=0.4   # Right ring
+WAIT 0.1
+SOUND -0.061484,0.055537 FREQ=300 AMP=0.4  # Left middle
+WAIT 0.1
+SOUND 0.061484,0.055537 FREQ=340 AMP=0.4   # Right middle
+WAIT 0.1
+SOUND -0.027246,0.044413 FREQ=320 AMP=0.4  # Left index
+WAIT 0.1
+SOUND 0.027246,0.044413 FREQ=330 AMP=0.4   # Right index
+WAIT 0.1
+
+WAIT 0.5
+
+# ========================================
+# SECTION 4: WAVE EFFECTS
+# ========================================
+
+tone_duration = 0.15
+
+# Wave flowing from left pinky to right pinky
+SOUND -0.135099,0.033192 FREQ=200 AMP=0.5  # Left pinky
+WAIT 0.15
+SOUND -0.097244,0.051385 FREQ=220 AMP=0.5  # Left ring
+WAIT 0.15
+SOUND -0.061484,0.055537 FREQ=240 AMP=0.5  # Left middle
+WAIT 0.15
+SOUND -0.027246,0.044413 FREQ=260 AMP=0.5  # Left index
+WAIT 0.15
+SOUND -0.0200,0.0000 FREQ=280 AMP=0.5      # Left thumb
+WAIT 0.15
+SOUND 0.0200,0.0000 FREQ=300 AMP=0.5       # Right thumb
+WAIT 0.15
+SOUND 0.027246,0.044413 FREQ=320 AMP=0.5   # Right index
+WAIT 0.15
+SOUND 0.061484,0.055537 FREQ=340 AMP=0.5   # Right middle
+WAIT 0.15
+SOUND 0.097244,0.051385 FREQ=360 AMP=0.5   # Right ring
+WAIT 0.15
+SOUND 0.135099,0.033192 FREQ=380 AMP=0.5   # Right pinky
+
+WAIT 0.5
+
+# Wave flowing back
+SOUND 0.135099,0.033192 FREQ=380 AMP=0.5   # Right pinky
+WAIT 0.12
+SOUND 0.097244,0.051385 FREQ=360 AMP=0.5   # Right ring
+WAIT 0.12
+SOUND 0.061484,0.055537 FREQ=340 AMP=0.5   # Right middle
+WAIT 0.12
+SOUND 0.027246,0.044413 FREQ=320 AMP=0.5   # Right index
+WAIT 0.12
+SOUND 0.0200,0.0000 FREQ=300 AMP=0.5       # Right thumb
+WAIT 0.12
+SOUND -0.0200,0.0000 FREQ=280 AMP=0.5      # Left thumb
+WAIT 0.12
+SOUND -0.027246,0.044413 FREQ=260 AMP=0.5  # Left index
+WAIT 0.12
+SOUND -0.061484,0.055537 FREQ=240 AMP=0.5  # Left middle
+WAIT 0.12
+SOUND -0.097244,0.051385 FREQ=220 AMP=0.5  # Left ring
+WAIT 0.12
+SOUND -0.135099,0.033192 FREQ=200 AMP=0.5  # Left pinky
+
+WAIT 0.8
+
+# ========================================
+# SECTION 5: THUMB WRESTLING BATTLE
+# ========================================
+
+tone_duration = 0.1
+
+# Alternating thumbs with increasing intensity
+SOUND -0.0200,0.0000 FREQ=250 AMP=0.4      # Left thumb
+WAIT 0.2
+SOUND 0.0200,0.0000 FREQ=260 AMP=0.4       # Right thumb
+WAIT 0.2
+SOUND -0.0200,0.0000 FREQ=270 AMP=0.5      # Left thumb stronger
+WAIT 0.18
+SOUND 0.0200,0.0000 FREQ=280 AMP=0.5       # Right thumb stronger
+WAIT 0.18
+SOUND -0.0200,0.0000 FREQ=290 AMP=0.6      # Left thumb even stronger
+WAIT 0.15
+SOUND 0.0200,0.0000 FREQ=300 AMP=0.6       # Right thumb even stronger
+WAIT 0.15
+
+# Final thumb battle with rapid alternation
+SOUND -0.0200,0.0000 FREQ=350 AMP=0.7      # Left thumb
+WAIT 0.1
+SOUND 0.0200,0.0000 FREQ=360 AMP=0.7       # Right thumb
+WAIT 0.1
+SOUND -0.0200,0.0000 FREQ=370 AMP=0.7      # Left thumb
+WAIT 0.1
+SOUND 0.0200,0.0000 FREQ=380 AMP=0.7       # Right thumb
+WAIT 0.1
+
+# Victory celebration - right thumb wins!
+SOUND 0.0200,0.0000 FREQ=400 AMP=0.8       # Right thumb victory
+WAIT 0.5
+
+WAIT 0.8
+
+# ========================================
+# SECTION 6: SMOOTH FINGER EXERCISE
+# ========================================
+
+# Smooth frequency ramps across finger positions
+FREQ_RAMP_SMOOTH POS=-0.135099,0.033192 START_FREQ=200 END_FREQ=300 DURATION=1.0 AMP=0.5  # Left pinky
+WAIT 0.3
+FREQ_RAMP_SMOOTH POS=-0.097244,0.051385 START_FREQ=250 END_FREQ=350 DURATION=1.0 AMP=0.5  # Left ring
+WAIT 0.3
+FREQ_RAMP_SMOOTH POS=0.097244,0.051385 START_FREQ=300 END_FREQ=400 DURATION=1.0 AMP=0.5   # Right ring
+WAIT 0.3
+FREQ_RAMP_SMOOTH POS=0.135099,0.033192 START_FREQ=350 END_FREQ=450 DURATION=1.0 AMP=0.5   # Right pinky
+
+WAIT 1.0
+
+# ========================================
+# SECTION 7: MIRROR HAND PATTERNS
+# ========================================
+
+tone_duration = 0.1
+
+# Symmetric patterns - both hands mirror each other
+SOUND -0.135099,0.033192 FREQ=300 AMP=0.5  # Left pinky
+SOUND 0.135099,0.033192 FREQ=300 AMP=0.5   # Right pinky (same time)
+WAIT 0.3
+
+SOUND -0.097244,0.051385 FREQ=320 AMP=0.5  # Left ring
+SOUND 0.097244,0.051385 FREQ=320 AMP=0.5   # Right ring
+WAIT 0.3
+
+SOUND -0.061484,0.055537 FREQ=340 AMP=0.5  # Left middle
+SOUND 0.061484,0.055537 FREQ=340 AMP=0.5   # Right middle
+WAIT 0.3
+
+SOUND -0.027246,0.044413 FREQ=360 AMP=0.5  # Left index
+SOUND 0.027246,0.044413 FREQ=360 AMP=0.5   # Right index
+WAIT 0.3
+
+SOUND -0.0200,0.0000 FREQ=380 AMP=0.6      # Left thumb
+SOUND 0.0200,0.0000 FREQ=380 AMP=0.6       # Right thumb
+WAIT 0.5
+
+# ========================================
+# SECTION 8: GRAND FINALE ARPEGGIO
+# ========================================
+
+tone_duration = 0.08
+
+# Fast arpeggio up and down both hands
+SOUND -0.135099,0.033192 FREQ=261 AMP=0.6  # C
+WAIT 0.1
+SOUND -0.097244,0.051385 FREQ=329 AMP=0.6  # E
+WAIT 0.1
+SOUND -0.061484,0.055537 FREQ=392 AMP=0.6  # G
+WAIT 0.1
+SOUND -0.027246,0.044413 FREQ=523 AMP=0.6  # C
+WAIT 0.1
+SOUND 0.027246,0.044413 FREQ=659 AMP=0.6   # E
+WAIT 0.1
+SOUND 0.061484,0.055537 FREQ=784 AMP=0.6   # G
+WAIT 0.1
+SOUND 0.097244,0.051385 FREQ=1047 AMP=0.6  # C
+WAIT 0.1
+SOUND 0.135099,0.033192 FREQ=1319 AMP=0.6  # E
+WAIT 0.1
+
+# Fast descent
+SOUND 0.097244,0.051385 FREQ=1047 AMP=0.6  # C
+WAIT 0.08
+SOUND 0.061484,0.055537 FREQ=784 AMP=0.6   # G
+WAIT 0.08
+SOUND 0.027246,0.044413 FREQ=659 AMP=0.6   # E
+WAIT 0.08
+SOUND -0.027246,0.044413 FREQ=523 AMP=0.6  # C
+WAIT 0.08
+SOUND -0.061484,0.055537 FREQ=392 AMP=0.6  # G
+WAIT 0.08
+SOUND -0.097244,0.051385 FREQ=329 AMP=0.6  # E
+WAIT 0.08
+SOUND -0.135099,0.033192 FREQ=261 AMP=0.6  # C
+
+WAIT 0.5
+
+# Final dramatic chord effect - all fingers at once with center
+SOUND 0.0,0.0 FREQ=400 AMP=0.8
+WAIT 1.5
+
+# ========================================
+# SECTION 9: PLAYFUL FINGER TAPPING
+# ========================================
+
+tone_duration = 0.06
+
+# Random-seeming but rhythmic finger tapping pattern
+SOUND -0.061484,0.055537 FREQ=300 AMP=0.4  # Left middle
+WAIT 0.15
+SOUND 0.027246,0.044413 FREQ=320 AMP=0.4   # Right index
+WAIT 0.1
+SOUND -0.027246,0.044413 FREQ=310 AMP=0.4  # Left index
+WAIT 0.1
+SOUND 0.061484,0.055537 FREQ=330 AMP=0.4   # Right middle
+WAIT 0.15
+SOUND -0.135099,0.033192 FREQ=280 AMP=0.4  # Left pinky
+WAIT 0.2
+SOUND 0.135099,0.033192 FREQ=350 AMP=0.4   # Right pinky
+WAIT 0.1
+SOUND -0.0200,0.0000 FREQ=290 AMP=0.5      # Left thumb
+WAIT 0.1
+SOUND 0.0200,0.0000 FREQ=340 AMP=0.5       # Right thumb
+WAIT 0.2
+
+# Speed up the tapping
+SOUND -0.097244,0.051385 FREQ=285 AMP=0.4  # Left ring
+WAIT 0.08
+SOUND 0.097244,0.051385 FREQ=335 AMP=0.4   # Right ring
+WAIT 0.08
+SOUND -0.061484,0.055537 FREQ=305 AMP=0.4  # Left middle
+WAIT 0.08
+SOUND 0.061484,0.055537 FREQ=325 AMP=0.4   # Right middle
+WAIT 0.08
+SOUND -0.027246,0.044413 FREQ=315 AMP=0.4  # Left index
+WAIT 0.08
+SOUND 0.027246,0.044413 FREQ=345 AMP=0.4   # Right index
+WAIT 0.08
+
+WAIT 0.5
+
+# ========================================
+# FINALE: FAREWELL WAVE
+# ========================================
+
+tone_duration = 0.12
+
+# Gentle goodbye wave from right to left
+SOUND 0.135099,0.033192 FREQ=350 AMP=0.4   # Right pinky
+WAIT 0.2
+SOUND 0.097244,0.051385 FREQ=330 AMP=0.4   # Right ring
+WAIT 0.2
+SOUND 0.061484,0.055537 FREQ=310 AMP=0.4   # Right middle
+WAIT 0.2
+SOUND 0.027246,0.044413 FREQ=290 AMP=0.4   # Right index
+WAIT 0.2
+SOUND 0.0200,0.0000 FREQ=270 AMP=0.4       # Right thumb
+WAIT 0.3
+SOUND -0.0200,0.0000 FREQ=250 AMP=0.4      # Left thumb
+WAIT 0.2
+SOUND -0.027246,0.044413 FREQ=230 AMP=0.4  # Left index
+WAIT 0.2
+SOUND -0.061484,0.055537 FREQ=210 AMP=0.4  # Left middle
+WAIT 0.2
+SOUND -0.097244,0.051385 FREQ=190 AMP=0.4  # Left ring
+WAIT 0.2
+SOUND -0.135099,0.033192 FREQ=170 AMP=0.4  # Left pinky
+
+WAIT 1.0
+
+# Final center point to complete the demo
+SOUND 0.0,0.0 FREQ=200 AMP=0.3

@@ -1,0 +1,32 @@
+# Spatialization Methods Demonstration
+# Shows different spatialization approaches
+# Note: Change method in config file to test different approaches
+
+itd_exaggeration = 6.0
+ild_exponent = 4.0
+tone_duration = 0.2
+
+# 1. Test positions that highlight differences between methods
+SOUND -0.04,-0.04 FREQ=200 AMP=0.5   # Bottom-left
+WAIT 1.0
+SOUND 0.04,-0.04 FREQ=220 AMP=0.5    # Bottom-right  
+WAIT 1.0
+SOUND 0.04,0.04 FREQ=240 AMP=0.5     # Top-right
+WAIT 1.0
+SOUND -0.04,0.04 FREQ=260 AMP=0.5    # Top-left
+WAIT 1.0
+SOUND 0.0,0.0 FREQ=300 AMP=0.6       # Center
+WAIT 1.5
+
+# 2. Gradual movement to show interpolation differences
+ARC -0.06,0.0 0.06,0.0 DURATION=4.0 STEPS=40 FREQ=250 AMP=0.4
+WAIT 1.0
+
+# 3. Circular motion to test directional accuracy
+CIRCLE_SMOOTH RADIUS=0.04 DURATION=6.0 STEPS=240 FREQ=220 AMP=0.3
+WAIT 1.0
+
+# 4. Diagonal movements
+ARC -0.06,-0.06 0.06,0.06 DURATION=3.0 STEPS=30 FREQ=280 AMP=0.4
+WAIT 0.5
+ARC 0.06,-0.06 -0.06,0.06 DURATION=3.0 STEPS=30 FREQ=280 AMP=0.4

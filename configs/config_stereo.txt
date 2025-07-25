@@ -1,0 +1,9 @@
+# Stereo Speaker Configuration
+# Standard left/right speakers
+
+config_name = stereo_pair
+method = itd_ild
+
+# Left and right speakers
+SPEAKER LEFT  -0.5,0.0 CHANNEL=0 DESCRIPTION="Left speaker"
+SPEAKER RIGHT  0.5,0.0 CHANNEL=1 DESCRIPTION="Right speaker"

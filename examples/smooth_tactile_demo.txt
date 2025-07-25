@@ -1,0 +1,44 @@
+# Smooth Tactile Grid Demonstration
+# Shows the improved smooth spatialization (no more clicking/jumping)
+
+# Configuration for optimal smooth tactile perception
+itd_exaggeration = 6.0
+ild_exponent = 4.0
+tone_duration = 0.15
+
+# 1. Smooth linear movement (left to right)
+SOUND -0.04,0.0 FREQ=300 AMP=0.4
+WAIT 0.3
+SOUND -0.02,0.0 FREQ=300 AMP=0.4
+WAIT 0.3
+SOUND 0.0,0.0 FREQ=300 AMP=0.4
+WAIT 0.3
+SOUND 0.02,0.0 FREQ=300 AMP=0.4
+WAIT 0.3
+SOUND 0.04,0.0 FREQ=300 AMP=0.4
+WAIT 1.0
+
+# 2. Test equal volume between speakers (should feel balanced)
+SOUND -0.01,0.0 FREQ=250 AMP=0.4   # Halfway between speakers
+WAIT 0.5
+SOUND 0.01,0.0 FREQ=250 AMP=0.4    # Halfway between speakers
+WAIT 1.0
+
+# 3. Continuous smooth arc movement (no clicking)
+ARC -0.04,-0.04 0.04,0.04 DURATION=3.0 STEPS=50 FREQ=280 AMP=0.4
+WAIT 1.0
+
+# 4. Smooth circular motion
+CIRCLE_SMOOTH RADIUS=0.03 DURATION=4.0 STEPS=200 FREQ=220 AMP=0.3
+WAIT 1.0
+
+# 5. Fine movement test (micro-positioning)
+SOUND 0.0,0.0 FREQ=300 AMP=0.4
+WAIT 0.4
+SOUND 0.005,0.0 FREQ=300 AMP=0.4   # 5mm movement
+WAIT 0.4
+SOUND 0.01,0.0 FREQ=300 AMP=0.4    # 10mm movement
+WAIT 0.4
+SOUND 0.015,0.0 FREQ=300 AMP=0.4   # 15mm movement
+WAIT 0.4
+SOUND 0.02,0.0 FREQ=300 AMP=0.4    # 20mm movement

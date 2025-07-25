@@ -1,0 +1,50 @@
+# Test All Speakers - 4x4 Grid
+# Plays each speaker individually for testing
+
+itd_exaggeration = 4.0
+ild_exponent = 2.0
+tone_duration = 0.2
+
+# Test each speaker in the 4x4 grid
+# Bottom row
+SOUND -0.06,-0.06 FREQ=440 AMP=0.5   # CH0
+WAIT 0.7
+SOUND -0.02,-0.06 FREQ=440 AMP=0.5   # CH1
+WAIT 0.7
+SOUND 0.02,-0.06 FREQ=440 AMP=0.5    # CH2
+WAIT 0.7
+SOUND 0.06,-0.06 FREQ=440 AMP=0.5    # CH3
+WAIT 0.7
+
+# Second row
+SOUND -0.06,-0.02 FREQ=500 AMP=0.5   # CH4
+WAIT 0.7
+SOUND -0.02,-0.02 FREQ=500 AMP=0.5   # CH5
+WAIT 0.7
+SOUND 0.02,-0.02 FREQ=500 AMP=0.5    # CH6
+WAIT 0.7
+SOUND 0.06,-0.02 FREQ=500 AMP=0.5    # CH7
+WAIT 0.7
+
+# Third row
+SOUND -0.06,0.02 FREQ=550 AMP=0.5    # CH8
+WAIT 0.7
+SOUND -0.02,0.02 FREQ=550 AMP=0.5    # CH9
+WAIT 0.7
+SOUND 0.02,0.02 FREQ=550 AMP=0.5     # CH10
+WAIT 0.7
+SOUND 0.06,0.02 FREQ=550 AMP=0.5     # CH11
+WAIT 0.7
+
+# Top row
+SOUND -0.06,0.06 FREQ=600 AMP=0.5    # CH12
+WAIT 0.7
+SOUND -0.02,0.06 FREQ=600 AMP=0.5    # CH13
+WAIT 0.7
+SOUND 0.02,0.06 FREQ=600 AMP=0.5     # CH14
+WAIT 0.7
+SOUND 0.06,0.06 FREQ=600 AMP=0.5     # CH15
+WAIT 1.0
+
+# Final center sound
+SOUND 0.0,0.0 FREQ=300 AMP=0.6

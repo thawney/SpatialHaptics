@@ -1,0 +1,231 @@
+# Spatial Finger Layout Demo - Showcasing Spatial Interpolation
+# Demonstrates how sound moves smoothly through the finger space,
+# with the tactile system interpolating between actual finger positions
+
+# Configuration optimized for spatial tactile perception
+itd_exaggeration = 6.0
+ild_exponent = 4.0
+tone_duration = 0.15
+
+# ========================================
+# SECTION 1: SPATIAL POSITIONING INTRO
+# ========================================
+
+# Start with a reference point at the center of the finger space
+SOUND 0.0,0.045 FREQ=300 AMP=0.6
+WAIT 1.0
+
+# Demonstrate that sound can exist BETWEEN fingers, not just AT fingers
+# Move smoothly across the palm space - this will activate multiple fingers
+SOUND -0.08,0.02 FREQ=250 AMP=0.5   # Between left ring and middle
+WAIT 0.8
+SOUND -0.04,0.03 FREQ=270 AMP=0.5   # Between left middle and index
+WAIT 0.8
+SOUND 0.04,0.03 FREQ=290 AMP=0.5    # Between right index and middle
+WAIT 0.8
+SOUND 0.08,0.02 FREQ=310 AMP=0.5    # Between right middle and ring
+WAIT 1.0
+
+# ========================================
+# SECTION 2: LINEAR SPATIAL SWEEPS
+# ========================================
+
+# Smooth linear movement across the entire finger space
+# This shows spatial interpolation as the sound moves between finger positions
+ARC -0.135,0.033 0.135,0.033 DURATION=3.0 STEPS=30 FREQ=200 AMP=0.5
+WAIT 1.0
+
+# Sweep from back to front of hand space
+ARC -0.135,0.01 -0.135,0.06 DURATION=2.0 STEPS=20 FREQ=250 AMP=0.5
+WAIT 0.5
+ARC 0.135,0.06 0.135,0.01 DURATION=2.0 STEPS=20 FREQ=250 AMP=0.5
+WAIT 1.0
+
+# Diagonal sweeps through the finger space
+ARC -0.135,0.01 0.135,0.06 DURATION=2.5 STEPS=25 FREQ=180 AMP=0.5
+WAIT 0.5
+ARC 0.135,0.01 -0.135,0.06 DURATION=2.5 STEPS=25 FREQ=180 AMP=0.5
+WAIT 1.0
+
+# ========================================
+# SECTION 3: CIRCULAR SPATIAL MOTIONS
+# ========================================
+
+# Small tight circle in the center - shows how multiple fingers activate
+CIRCLE_SMOOTH RADIUS=0.02 DURATION=3.0 STEPS=180 FREQ=220 AMP=0.4
+WAIT 1.0
+
+# Medium circle covering more of the finger space
+CIRCLE_SMOOTH RADIUS=0.05 DURATION=4.0 STEPS=240 FREQ=200 AMP=0.4
+WAIT 1.0
+
+# Large circle using the full finger layout space
+CIRCLE_SMOOTH RADIUS=0.08 DURATION=5.0 STEPS=300 FREQ=180 AMP=0.4
+WAIT 1.0
+
+# ========================================
+# SECTION 4: CURVED SPATIAL PATHS
+# ========================================
+
+# Curved path from left pinky area through center to right pinky area
+ARC -0.135,0.033 0.0,0.08 0.135,0.033 DURATION=3.0 STEPS=30 FREQ=240 AMP=0.5 MODE=CURVED
+WAIT 1.0
+
+# S-curve through the finger space
+ARC -0.10,0.02 -0.03,0.07 0.03,0.02 0.10,0.07 DURATION=4.0 STEPS=40 FREQ=200 AMP=0.5 MODE=CURVED
+WAIT 1.0
+
+# Figure-8 pattern using two curved arcs
+ARC -0.06,0.04 0.0,0.08 0.06,0.04 DURATION=2.0 STEPS=20 FREQ=260 AMP=0.4 MODE=CURVED
+WAIT 0.2
+ARC 0.06,0.04 0.0,0.02 -0.06,0.04 DURATION=2.0 STEPS=20 FREQ=260 AMP=0.4 MODE=CURVED
+WAIT 1.0
+
+# ========================================
+# SECTION 5: SPATIAL FREQUENCY EFFECTS
+# ========================================
+
+# Frequency rises as sound moves from left to right across finger space
+PATH_FREQ_RAMP -0.135,0.033 0.135,0.033 START_FREQ=150 END_FREQ=400 DURATION=3.0 STEPS=60 AMP=0.5
+WAIT 1.0
+
+# Frequency falls as sound moves from front to back
+PATH_FREQ_RAMP 0.0,0.08 0.0,0.01 START_FREQ=350 END_FREQ=180 DURATION=2.5 STEPS=50 AMP=0.5
+WAIT 1.0
+
+# Curved path with frequency sweep - creates Doppler-like effect
+PATH_FREQ_RAMP -0.08,0.02 0.0,0.08 0.08,0.02 START_FREQ=200 END_FREQ=300 DURATION=3.0 STEPS=40 AMP=0.5 MODE=CURVED
+WAIT 1.0
+
+# ========================================
+# SECTION 6: SPATIAL "BOUNCING BALL"
+# ========================================
+
+# Simulate a ball bouncing between the finger boundaries
+ARC -0.12,0.05 -0.08,0.05 DURATION=0.8 STEPS=8 FREQ=300 AMP=0.6  # Left side
+WAIT 0.1
+ARC -0.08,0.05 0.08,0.05 DURATION=1.2 STEPS=12 FREQ=280 AMP=0.6  # Across center
+WAIT 0.1
+ARC 0.08,0.05 0.12,0.05 DURATION=0.8 STEPS=8 FREQ=320 AMP=0.6   # Right side
+WAIT 0.1
+ARC 0.12,0.05 0.08,0.05 DURATION=0.8 STEPS=8 FREQ=320 AMP=0.6   # Bounce back
+WAIT 0.1
+ARC 0.08,0.05 -0.08,0.05 DURATION=1.2 STEPS=12 FREQ=300 AMP=0.6  # Back across
+WAIT 0.1
+ARC -0.08,0.05 -0.12,0.05 DURATION=0.8 STEPS=8 FREQ=280 AMP=0.6  # Left again
+
+WAIT 1.0
+
+# ========================================
+# SECTION 7: SPATIAL WAVES AND INTERFERENCE
+# ========================================
+
+# Wave propagating from left thumb to right thumb through palm space
+ARC -0.020,0.000 0.020,0.000 DURATION=2.0 STEPS=40 FREQ=250 AMP=0.5
+WAIT 0.5
+
+# Overlapping waves - from index finger areas meeting in center
+ARC -0.027,0.044 0.000,0.044 DURATION=1.5 STEPS=15 FREQ=200 AMP=0.4
+WAIT 0.2
+ARC 0.027,0.044 0.000,0.044 DURATION=1.5 STEPS=15 FREQ=220 AMP=0.4
+WAIT 1.0
+
+# Spiral wave emanating from center
+CIRCLE_SMOOTH RADIUS=0.01 DURATION=1.0 STEPS=60 FREQ=300 AMP=0.5
+WAIT 0.2
+CIRCLE_SMOOTH RADIUS=0.03 DURATION=1.5 STEPS=90 FREQ=280 AMP=0.4
+WAIT 0.2
+CIRCLE_SMOOTH RADIUS=0.06 DURATION=2.0 STEPS=120 FREQ=260 AMP=0.3
+
+WAIT 1.0
+
+# ========================================
+# SECTION 8: COMPLEX SPATIAL PATTERNS
+# ========================================
+
+# Infinity symbol pattern through the finger space
+ARC -0.06,0.03 0.0,0.06 0.06,0.03 DURATION=2.0 STEPS=20 FREQ=220 AMP=0.4 MODE=CURVED
+WAIT 0.1
+ARC 0.06,0.03 0.0,0.02 -0.06,0.03 DURATION=2.0 STEPS=20 FREQ=240 AMP=0.4 MODE=CURVED
+WAIT 0.5
+
+# Multiple simultaneous movements (using WAIT 0 to overlap)
+ARC -0.10,0.04 -0.05,0.04 DURATION=1.5 STEPS=15 FREQ=200 AMP=0.3
+WAIT 0.2
+ARC 0.05,0.04 0.10,0.04 DURATION=1.5 STEPS=15 FREQ=260 AMP=0.3
+WAIT 1.0
+
+# Corkscrew pattern - combining circular motion with linear progression
+CIRCLE_SMOOTH RADIUS=0.02 DURATION=1.0 STEPS=60 FREQ=250 AMP=0.4
+WAIT 0.1
+PATH_FREQ_RAMP -0.04,0.04 0.04,0.04 START_FREQ=250 END_FREQ=300 DURATION=1.5 STEPS=30 AMP=0.4
+WAIT 0.1
+CIRCLE_SMOOTH RADIUS=0.02 DURATION=1.0 STEPS=60 FREQ=300 AMP=0.4
+
+WAIT 1.0
+
+# ========================================
+# SECTION 9: PROXIMITY AND DISTANCE EFFECTS
+# ========================================
+
+# Sound moving close to specific fingers - shows spatial resolution
+# Near left pinky area
+SOUND -0.120,0.035 FREQ=200 AMP=0.5   # Very close to left pinky
+WAIT 0.8
+SOUND -0.100,0.040 FREQ=210 AMP=0.5   # Still close but moving toward ring
+WAIT 0.8
+SOUND -0.080,0.045 FREQ=220 AMP=0.5   # Between pinky and ring
+WAIT 0.8
+
+# Near the index finger area with micro-movements
+SOUND -0.025,0.042 FREQ=240 AMP=0.5   # Very close to left index
+WAIT 0.8
+SOUND -0.020,0.046 FREQ=245 AMP=0.5   # Slightly off the finger
+WAIT 0.8
+SOUND -0.015,0.048 FREQ=250 AMP=0.5   # Moving toward center
+WAIT 0.8
+
+# Show how the center area activates multiple fingers differently
+SOUND 0.000,0.030 FREQ=260 AMP=0.5    # Lower in palm
+WAIT 0.8
+SOUND 0.000,0.045 FREQ=270 AMP=0.5    # Center of finger space
+WAIT 0.8
+SOUND 0.000,0.060 FREQ=280 AMP=0.5    # Higher up near fingertips
+WAIT 1.0
+
+# ========================================
+# SECTION 10: GRAND SPATIAL FINALE
+# ========================================
+
+# Complex multi-part spatial symphony
+# Start with outer boundary trace
+ARC -0.135,0.01 -0.135,0.06 DURATION=1.0 STEPS=10 FREQ=180 AMP=0.4  # Left edge
+WAIT 0.1
+ARC -0.135,0.06 0.135,0.06 DURATION=2.0 STEPS=20 FREQ=200 AMP=0.4   # Top edge
+WAIT 0.1
+ARC 0.135,0.06 0.135,0.01 DURATION=1.0 STEPS=10 FREQ=220 AMP=0.4    # Right edge
+WAIT 0.1
+ARC 0.135,0.01 -0.135,0.01 DURATION=2.0 STEPS=20 FREQ=240 AMP=0.4   # Bottom edge
+WAIT 0.5
+
+# Spiral inward with increasing frequency
+CIRCLE_SMOOTH RADIUS=0.08 DURATION=2.0 STEPS=120 FREQ=200 AMP=0.3
+WAIT 0.2
+CIRCLE_SMOOTH RADIUS=0.06 DURATION=1.5 STEPS=90 FREQ=250 AMP=0.4
+WAIT 0.2
+CIRCLE_SMOOTH RADIUS=0.04 DURATION=1.0 STEPS=60 FREQ=300 AMP=0.5
+WAIT 0.2
+CIRCLE_SMOOTH RADIUS=0.02 DURATION=0.5 STEPS=30 FREQ=350 AMP=0.6
+
+# Final burst at center showing all fingers working together
+FREQ_RAMP_SMOOTH POS=0.0,0.045 START_FREQ=350 END_FREQ=500 DURATION=2.0 AMP=0.7
+
+WAIT 1.0
+
+# Gentle fade-out with outward spiral
+CIRCLE_SMOOTH RADIUS=0.03 DURATION=2.0 STEPS=120 FREQ=200 AMP=0.3
+WAIT 0.5
+CIRCLE_SMOOTH RADIUS=0.06 DURATION=3.0 STEPS=180 FREQ=150 AMP=0.2
+
+# Final center point
+SOUND 0.0,0.045 FREQ=180 AMP=0.3

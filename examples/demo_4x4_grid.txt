@@ -1,0 +1,38 @@
+# 4x4 Grid Demonstration
+# Shows the capabilities of the 4x4 tactile grid
+
+# Configuration for optimal tactile perception
+itd_exaggeration = 6.0
+ild_exponent = 4.0
+tone_duration = 0.1
+
+# 1. Corner sounds - demonstrate coverage area
+SOUND -0.06,-0.06 FREQ=200 AMP=0.5   # Bottom-left corner
+WAIT 0.8
+SOUND 0.06,-0.06 FREQ=220 AMP=0.5    # Bottom-right corner
+WAIT 0.8
+SOUND 0.06,0.06 FREQ=240 AMP=0.5     # Top-right corner
+WAIT 0.8
+SOUND -0.06,0.06 FREQ=260 AMP=0.5    # Top-left corner
+WAIT 0.8
+SOUND 0.0,0.0 FREQ=300 AMP=0.6       # Center
+WAIT 1.5
+
+# 2. Linear sweep across the grid
+ARC -0.06,0.0 0.06,0.0 DURATION=2.0 STEPS=20 FREQ=250 AMP=0.4
+WAIT 1.0
+
+# 3. Circular motion around the grid
+CIRCLE_SMOOTH RADIUS=0.04 DURATION=4.0 STEPS=180 FREQ=220 AMP=0.3
+WAIT 1.0
+
+# 4. Frequency sweep at center
+FREQ_RAMP_SMOOTH POS=0.0,0.0 START_FREQ=150 END_FREQ=400 DURATION=3.0 AMP=0.4
+WAIT 1.0
+
+# 5. Combined movement and frequency change
+PATH_FREQ_RAMP -0.04,-0.04 0.04,0.04 START_FREQ=200 END_FREQ=350 DURATION=2.5 STEPS=50 AMP=0.4
+WAIT 1.0
+
+# 6. Curved path demonstration
+ARC -0.06,0.0 0.0,0.08 0.06,0.0 DURATION=3.0 STEPS=30 FREQ=280 AMP=0.4 MODE=CURVED

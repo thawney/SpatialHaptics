@@ -1,0 +1,21 @@
+# 4x4 Tactile Grid Configuration
+# 40mm spacing between speaker centers
+# Optimized for tactile/haptic feedback with Thawney's 16-channel driver board
+
+config_name = 4x4_tactile_grid
+method = tactile_grid
+
+# Create 4x4 grid with 40mm spacing
+GRID SIZE=4 SPACING=0.04 OFFSET=0.0,0.0
+
+# This creates a 120mm x 120mm grid with speakers at:
+# Row 0: (-0.060,-0.060), (-0.020,-0.060), (0.020,-0.060), (0.060,-0.060)
+# Row 1: (-0.060,-0.020), (-0.020,-0.020), (0.020,-0.020), (0.060,-0.020)
+# Row 2: (-0.060,0.020), (-0.020,0.020), (0.020,0.020), (0.060,0.020)
+# Row 3: (-0.060,0.060), (-0.020,0.060), (0.020,0.060), (0.060,0.060)
+
+# Channels are assigned vertically (bottom-to-top), then next column:
+# CH3  CH7  CH11 CH15    (top row)
+# CH2  CH6  CH10 CH14     
+# CH1  CH5  CH9  CH13    
+# CH0  CH4  CH8  CH12    (bottom row)

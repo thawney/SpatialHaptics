@@ -1,0 +1,17 @@
+# 2x2 Test Grid Configuration
+# 40mm spacing for testing with limited channels
+# Works with any 4-channel audio interface
+
+config_name = 2x2_test_grid
+method = tactile_grid
+
+# Create 2x2 grid with 40mm spacing
+GRID SIZE=2 SPACING=0.04 OFFSET=0.0,0.0
+
+# This creates speakers at:
+# (-0.020,-0.020), (0.020,-0.020)  (bottom row)
+# (-0.020,0.020), (0.020,0.020)    (top row)
+
+# Channels increment vertically (bottom-to-top), then next column:
+# CH1  CH3    (top row)
+# CH0  CH2    (bottom row)

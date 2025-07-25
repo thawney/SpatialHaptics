@@ -1,5 +1,3 @@
-![Multi-Speaker Tactile Spatialiser System](https://images.squarespace-cdn.com/content/v1/678481a8034d591e058ea73e/183c6d9b-7433-4186-b2e7-6b9c5acfd86b/PXL_20250723_160855977.jpg)
-
 # Multi-Speaker Tactile Spatialiser
 
 ## Quick Start
