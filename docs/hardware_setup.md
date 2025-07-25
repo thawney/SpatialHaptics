@@ -49,7 +49,7 @@ If using other audio interfaces:
 
 ## Software Configuration
 
-The system automatically detects and configures for Thawney's driver board. No additional driver installation required - it appears as a standard USB audio device.
+The system automatically detects and configures for Thawney's driver board. It appears as a standard class compliant USB audio device. If you are on windows you will need to install the minidsp driver provided and make sure your windows sound setup is aware it is a 16 channel device, otherwise it may treat it as stereo.
 
 ### Testing Your Setup
 

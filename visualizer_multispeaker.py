@@ -594,7 +594,7 @@ def main():
     # Main loop
     running = True
     clock = pygame.time.Clock()
-    status_message = "Ready. Drop a script file or press P to play current script."
+    status_message = "Please run the visualizer by using the --visualizer option in the main script."
 
     while running:
         # Process events
