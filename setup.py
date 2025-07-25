@@ -436,10 +436,10 @@ This system supports 5 different spatialization methods, each optimized for diff
 
 ---
 
-## 1. Tactile Grid (`tactile_grid`) - ✨ IMPROVED! ✨
+## 1. Tactile Grid (`tactile_grid`) - NEW: IMPROVED! NEW:
 **Default for grid arrays like 4x4, 8x8 - NOW WITH SMOOTH SPATIALIZATION**
 
-### ✨ **NEW: Fixed Clicking/Jumping Issues** ✨
+### NEW: **NEW: Fixed Clicking/Jumping Issues** NEW:
 
 **PROBLEM SOLVED:** The tactile grid method previously had "jumpy" behavior where:
 - Sound would click when the loudest speaker activated
@@ -447,11 +447,11 @@ This system supports 5 different spatialization methods, each optimized for diff
 - Moving sources felt like clicking from speaker to speaker instead of smooth travel
 
 **FIXES APPLIED:**
-- ✅ **Removed tactile exaggeration bias** - No more artificial 4x boost to closest speaker
-- ✅ **Increased minimum distance** - From 1mm to 8mm for smoother transitions
-- ✅ **Gentler distance falloff** - Uses power of 1.5 instead of 1.0 for less sharp transitions
-- ✅ **Power normalization** - Maintains consistent volume across all positions
-- ✅ **Configurable smoothness** - Multiple smoothness modes available
+- FIXED: **Removed tactile exaggeration bias** - No more artificial 4x boost to closest speaker
+- FIXED: **Increased minimum distance** - From 1mm to 8mm for smoother transitions
+- FIXED: **Gentler distance falloff** - Uses power of 1.5 instead of 1.0 for less sharp transitions
+- FIXED: **Power normalization** - Maintains consistent volume across all positions
+- FIXED: **Configurable smoothness** - Multiple smoothness modes available
 
 ### How it works (IMPROVED):
 - Uses smooth inverse distance weighting with up to 6 nearest speakers
@@ -482,7 +482,7 @@ method = tactile_grid
 GRID SIZE=4 SPACING=0.04 OFFSET=0.0,0.0
 ```
 
-### ✨ **NEW: Smoothness Configuration** ✨
+### NEW: **NEW: Smoothness Configuration** NEW:
 
 #### Interactive Configuration:
 ```bash
@@ -526,7 +526,7 @@ spatialiser.audio_engine.spat_engine.set_tactile_grid_parameters(
 - `distance_power` (float): Power for distance falloff - higher = more focused (default: 1.5)
 - `tactile_enhancement` (float): Overall tactile boost factor (default: 1.2)
 
-### ✨ **Testing the Smooth Improvements** ✨
+### NEW: **Testing the Smooth Improvements** NEW:
 
 ```bash
 # Test smooth movement
@@ -711,7 +711,7 @@ Performance testing   → nearest_neighbor (fastest)
 
 ---
 
-## ✨ **Troubleshooting Tactile Grid Issues** ✨
+## NEW: **Troubleshooting Tactile Grid Issues** NEW:
 
 ### Problem: Clicking/Jumping Between Speakers
 **SOLUTION (FIXED):** This has been resolved in the improved tactile grid method!
@@ -774,7 +774,7 @@ for i in range(20):
 
 ## Configuration Examples
 
-### ✨ **Smooth Tactile Setup (RECOMMENDED)** ✨
+### NEW: **Smooth Tactile Setup (RECOMMENDED)** NEW:
 ```
 # config_smooth_tactile.txt
 # Optimized for Thawney's 16-channel driver board
@@ -838,7 +838,7 @@ SPEAKER BR  0.3,-0.3 CHANNEL=3 DESCRIPTION="Back right"
 
 ## Advanced Usage
 
-### ✨ **NEW: Interactive Smoothness Configuration** ✨
+### NEW: **NEW: Interactive Smoothness Configuration** NEW:
 ```bash
 python multispeaker_main.py --config config_4x4_grid.txt --interactive
 > smooth
@@ -880,7 +880,7 @@ python multispeaker_main.py examples/smooth_tactile_demo.txt
 
 ## Method-Specific Tips
 
-### ✨ **Smooth Tactile Grid (IMPROVED):**
+### NEW: **Smooth Tactile Grid (IMPROVED):**
 - **Default settings work great** - No configuration needed for smooth operation
 - Use 40mm spacing for optimal tactile perception
 - For extra smoothness: enable Gaussian mode
@@ -914,10 +914,10 @@ python multispeaker_main.py examples/smooth_tactile_demo.txt
 
 ---
 
-## ✨ **Troubleshooting Methods (UPDATED)** ✨
+## NEW: **Troubleshooting Methods (UPDATED)** NEW:
 
 ### If tactile grid feels jumpy or clicky:
-1. ✅ **FIXED** - Update to latest version with smooth tactile grid
+1. FIXED: **FIXED** - Update to latest version with smooth tactile grid
 2. Test with: `python multispeaker_main.py examples/smooth_tactile_demo.txt`
 3. For extra smoothness: Use interactive `smooth` command
 4. Verify with movement test: play sounds from -0.04 to +0.04 in small steps
@@ -942,15 +942,15 @@ python multispeaker_main.py examples/smooth_tactile_demo.txt
 
 ---
 
-## ✨ **What's New in This Version** ✨
+## NEW: **What's New in This Version** NEW:
 
 ### Major Improvements to Tactile Grid:
-- ✅ **Fixed clicking/jumping issues** - Smooth transitions between speakers
-- ✅ **Equal volume positioning** - Sources between speakers have balanced volume  
-- ✅ **Configurable smoothness** - Multiple smoothness modes available
-- ✅ **Interactive configuration** - Easy smoothness adjustment via `smooth` command
-- ✅ **Power normalization** - Consistent perceived loudness across all positions
-- ✅ **Enhanced documentation** - Complete troubleshooting and configuration guide
+- FIXED: **Fixed clicking/jumping issues** - Smooth transitions between speakers
+- FIXED: **Equal volume positioning** - Sources between speakers have balanced volume  
+- FIXED: **Configurable smoothness** - Multiple smoothness modes available
+- FIXED: **Interactive configuration** - Easy smoothness adjustment via `smooth` command
+- FIXED: **Power normalization** - Consistent perceived loudness across all positions
+- FIXED: **Enhanced documentation** - Complete troubleshooting and configuration guide
 
 ### New Features:
 - Interactive smoothness configuration
@@ -1553,7 +1553,7 @@ ARC -0.06,0.0 0.06,0.0 DURATION=2.0 STEPS=20 FREQ=250 AMP=0.4
 
 ---
 
-**Happy Scripting!** 🎵✨
+**Happy Scripting!** 🎵NEW:
 
 *Create rich, immersive spatial experiences with precise multi-speaker control.*
 """)
@@ -1663,7 +1663,7 @@ python multispeaker_main.py examples/smooth_tactile_demo.txt --config config_4x4
 3. Adjust amplitude values in scripts (try AMP=0.7 instead of 0.5)
 4. Check for loose connections
 
-### ✨ Smooth Tactile Response (NEW)
+### NEW: Smooth Tactile Response (NEW)
 
 The improved tactile grid spatialization eliminates the "clicking" or "jumping" sensation between transducers:
 
@@ -1693,12 +1693,12 @@ def create_troubleshooting_guide():
 
 ## Common Issues and Solutions
 
-### ✨ Tactile Grid Issues (MAJOR IMPROVEMENTS)
+### NEW: Tactile Grid Issues (MAJOR IMPROVEMENTS)
 
-#### ✅ FIXED: Clicking/Jumping Between Speakers
+#### FIXED: FIXED: Clicking/Jumping Between Speakers
 **PROBLEM:** Sound would "click" when moving between speakers, felt jumpy instead of smooth.
 
-**SOLUTION:** ✅ **RESOLVED** in the improved tactile grid method!
+**SOLUTION:** FIXED: **RESOLVED** in the improved tactile grid method!
 
 **What was wrong:**
 - Old method artificially boosted closest speaker by 4x
@@ -1723,10 +1723,10 @@ python multispeaker_main.py --config config_4x4_grid.txt --interactive
 > play 0.02 0.0 300 0.4
 ```
 
-#### ✅ FIXED: Uneven Volume Between Speakers
+#### FIXED: FIXED: Uneven Volume Between Speakers
 **PROBLEM:** When a source was positioned exactly between two speakers, one would be louder than the other.
 
-**SOLUTION:** ✅ **RESOLVED** with power normalization!
+**SOLUTION:** FIXED: **RESOLVED** with power normalization!
 
 **Test equal volume:**
 ```bash
@@ -1809,13 +1809,13 @@ python multispeaker_main.py --config config_4x4_grid.txt --interactive
 3. Test with different mounting methods
 4. Check for loose connections
 
-#### ✅ IMPROVED: Spatial Perception Issues
+#### FIXED: IMPROVED: Spatial Perception Issues
 **PROBLEM:** Difficulty perceiving smooth movement between speakers.
 
-**SOLUTION:** ✅ **MUCH IMPROVED** with smooth tactile grid method!
+**SOLUTION:** FIXED: **MUCH IMPROVED** with smooth tactile grid method!
 
 **Additional optimizations:**
-1. ✅ **Already fixed** - Smooth spatialization eliminates most issues
+1. FIXED: **Already fixed** - Smooth spatialization eliminates most issues
 2. If you want extra smoothness: Use Gaussian mode
 3. Verify transducer positioning matches configuration
 4. Test with `examples/smooth_tactile_demo.txt`
@@ -1910,7 +1910,7 @@ GRID SIZE=4 SPACING=0.04 OFFSET=0.0,0.0
 4. Check audio interface channel assignments
 5. Review error messages in console output
 
-### ✨ What's New:
+### NEW: What's New:
 - **Smooth tactile spatialization** - No more clicking between speakers
 - **Equal volume positioning** - Balanced output for centered sources
 - **Configurable smoothness** - Multiple modes for different preferences
@@ -1945,7 +1945,7 @@ def test_audio_system():
             stream.close()
             print("✓ 16-channel audio stream test passed")
         except Exception as e:
-            print(f"⚠ 16-channel audio test failed: {e}")
+            print(f"WARNING: 16-channel audio test failed: {e}")
             print("  This is OK if you don't have a 16-channel interface")
 
             # Try stereo
@@ -1990,7 +1990,7 @@ def run_demo():
                     print(f"✓ {config_desc} loaded successfully")
                     break
                 except Exception as e:
-                    print(f"⚠ {config_desc} failed: {e}")
+                    print(f"WARNING: {config_desc} failed: {e}")
                     spatialiser = None
                     continue
 
@@ -2003,7 +2003,7 @@ def run_demo():
             spatialiser.start()
             print("✓ Audio stream started successfully")
         except Exception as e:
-            print(f"⚠ Audio stream startup failed: {e}")
+            print(f"WARNING: Audio stream startup failed: {e}")
             print("  This may be due to audio device limitations")
 
         print(f"\nSpatialiser Configuration:")
@@ -2014,10 +2014,10 @@ def run_demo():
 
         # Note smooth improvements and Thawney's board compatibility
         if spatialiser.speaker_config.method == 'tactile_grid':
-            print(f"  ✨ IMPROVED: Smooth tactile spatialization (no more clicking)")
+            print(f"  NEW: IMPROVED: Smooth tactile spatialization (no more clicking)")
             if spatialiser.audio_engine.num_channels == 16:
-                print(f"  ✨ Optimized for Thawney's 16-channel driver board")
-                print(f"  ✨ Channel mapping: Vertical increment (CH0 bottom-left → CH15 top-right)")
+                print(f"  NEW: Optimized for Thawney's 16-channel driver board")
+                print(f"  NEW: Channel mapping: Vertical increment (CH0 bottom-left → CH15 top-right)")
 
         # Test audio playback
         print("\nTesting audio playback...")
@@ -2039,7 +2039,7 @@ def run_demo():
 
         # Test smooth movement if tactile grid
         if spatialiser.speaker_config.method == 'tactile_grid':
-            print("\n✨ Testing smooth movement (should feel continuous):")
+            print("\nNEW: Testing smooth movement (should feel continuous):")
             for i in range(5):
                 x = -0.02 + (i * 0.01)  # -20mm to +20mm in 10mm steps
                 print(f"  Position: {x * 1000:.0f}mm")
@@ -2053,7 +2053,7 @@ def run_demo():
             pass
 
         print("✓ Demo completed successfully")
-        print("✨ Key improvement: Smooth tactile spatialization eliminates clicking/jumping!")
+        print("NEW: Key improvement: Smooth tactile spatialization eliminates clicking/jumping!")
         return True
 
     except Exception as e:
@@ -2100,22 +2100,22 @@ def main():
             print("\n✓ Installation completed successfully!")
             print("\nFiles created:")
             print("  configs/                           - Speaker configuration files")
-            print("    ├── config_4x4_grid.txt         - ✨ 4x4 grid for Thawney's 16-channel board")
+            print("    ├── config_4x4_grid.txt         - NEW: 4x4 grid for Thawney's 16-channel board")
             print("    ├── config_2x2_test.txt         - 2x2 test grid (any 4-channel interface)")
             print("    └── config_stereo.txt           - Stereo test (any audio interface)")
             print("  examples/                          - Demo scripts")
-            print("    ├── smooth_tactile_demo.txt      - ✨ NEW: Smooth spatialization demo")
+            print("    ├── smooth_tactile_demo.txt      - NEW: NEW: Smooth spatialization demo")
             print("    └── test_all_speakers.txt       - Individual channel testing")
             print("  docs/                              - Documentation")
-            print("    ├── spatialization_methods.md    - ✨ UPDATED: Complete guide with smooth tactile info")
+            print("    ├── spatialization_methods.md    - NEW: UPDATED: Complete guide with smooth tactile info")
             print("    ├── scripting_reference.md       - Scripting language reference")
-            print("    ├── hardware_setup.md            - ✨ UPDATED: Thawney's driver board setup")
-            print("    └── troubleshooting.md           - ✨ UPDATED: Smooth tactile troubleshooting")
-            print("\n✨ This system is designed for Thawney's 16-channel tactile driver board")
+            print("    ├── hardware_setup.md            - NEW: UPDATED: Thawney's driver board setup")
+            print("    └── troubleshooting.md           - NEW: UPDATED: Smooth tactile troubleshooting")
+            print("\nNEW: This system is designed for Thawney's 16-channel tactile driver board")
             print("  • Plug-and-play USB connectivity")
             print("  • Optimized 4x4 grid with 40mm spacing")
             print("  • Correct channel mapping (vertical increment: CH0 bottom-left → CH15 top-right)")
-            print("\n✨ Key improvements in this version:")
+            print("\nNEW: Key improvements in this version:")
             print("  • Smooth tactile grid spatialization (no more clicking/jumping)")
             print("  • Equal volume positioning between transducers")
             print("  • Configurable smoothness levels")
@@ -2123,7 +2123,7 @@ def main():
             print("  • Fixed channel mapping for Thawney's board")
             print("\nQuick start with Thawny's board:")
             print("  python multispeaker_main.py --config config_4x4_grid.txt --interactive")
-            print("  python multispeaker_main.py examples/smooth_tactile_demo.txt  # ✨ NEW")
+            print("  python multispeaker_main.py examples/smooth_tactile_demo.txt  # NEW: NEW")
             print("  python multispeaker_main.py examples/test_all_speakers.txt    # Verify channels")
             print("\nTest smooth improvements:")
             print("  python multispeaker_main.py --config config_4x4_grid.txt --interactive")
