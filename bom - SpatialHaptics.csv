@@ -1,0 +1,53 @@
+Main PCB x1,,,,
+,,,,
+,Designator,Footprint,Quantity,Designation
+,"FB15,FB30,FB29,FB6,FB32,FB27,FB5,FB22,FB21,FB19,FB11,FB8,FB7,FB12,FB3,FB9,FB31,FB1,FB16,FB13,FB17,FB18,FB14,FB25,FB4,FB28,FB2,FB20,FB23,FB24,FB10,FB26",L_0603_1608Metric,32,C85824
+,"C11,C58,C8,C60,C26,C56,C37,C6,C54,C25,C38,C29,C53,C59,C27,C21,C45,C40,C24,C61,C5,C22,C12,C44,C43,C9,C41,C57,C28,C10,C13,C42",C_0603_1608Metric,32,220pf
+,"J3,J13,J10,J14,J15,J17,J8,J2,J16,J5,J7,J9,J12,J6,J11,J4",JST_PH_S4B-PH-K_1x04_P2.00mm_Horizontal,16,Conn_01x04
+,"C49,C52,C36,C50,C4,C35,C18,C2,C19,C51,C3,C17,C33,C1,C34,C20",C_0603_1608Metric,16,10uf
+,"R1,R11,R10,R2",R_0603_1608Metric,4,100K
+,"R13,R14,R12,R5,R4,R3",R_0603_1608Metric,6,620K
+,"U5,U12,U10,U15,U2,U14,U16,U3,U1,U11,U8,U4,U13,U9,U6,U7",TQFN-16-1EP_3x3mm_P0.5mm_EP1.23x1.23mm,16,MAX98357A
+,"C73,C72",C_0402_1005Metric,2,100n
+,"C65,C71",CP_Elec_10x10.5,2,470uF 35V
+,"C30,C15,C64,C39,C63,C7,C23,C32,C14,C16,C62,C47,C46,C48,C55,C31",C_0603_1608Metric,16,0.1uf
+,"R15,R30,R24,R20,R23,R28,R29,R22,R27,R17,R18,R26,R21,R16,R25,R19",R_0603_1608Metric,16,10K
+,L1,L_Cenker_CKST0603,1,15uH 4A
+,U17,Teensy41,1,Teensy4.1
+,C76,C_1206_3216Metric,1,100u
+,"R8,R6,R9,R7",R_0603_1608Metric,4,22R
+,U18,Texas_HSOP-8-1EP_3.9x4.9mm_P1.27mm_ThermalVias,1,LMR33630BDDAR
+,"C75,C74",C_0603_1608Metric,2,10u
+,C67,C_0805_2012Metric,1,10uF 35V
+,R31,R_0805_2012Metric,1,100k 1%
+,J18,BarrelJack_XKB_DC-025LBM-5A-2.5,1,Barrel_Jack_Switch
+,R32,R_0402_1005Metric,1,43.3k 1%
+,C70,C_0402_1005Metric,1,1uF
+,C69,C_0805_2012Metric,1,220n 35V
+,J1,PinSocket_2x06_P2.00mm_Vertical,1,Conn_02x06_Odd_Even
+,MCHStreamer,MiniDSP MCHStreamer Lite,1,
+,Enclosure,3d printed enclosure,1,
+,,,,
+Breakout Board x16,,,,
+,,,,
+,Designator,Footprint,Quantity,Designation
+,J2,TerminalBlock_Xinya_XY308-2.54-2P_1x02_P2.54mm_Horizontal,1,Screw_Terminal_01x02
+,J1,JST_PH_S4B-PH-K_1x04_P2.00mm_Horizontal,1,Conn_01x04
+,J3,PinHeader_1x02_P2.54mm_Horizontal,1,Conn_01x02
+,FSR,"
+FSR07CE",1,"
+FSR07CE"
+,Transducer,Medium Surface Transducer,1,1785
+,Enclosure,3d printed enclosure,1,
+,,,,
+,,,,
+,,,,
+Misc,,,,
+,,,,
+,Designator,Footprint,Quantity,
+,JST PH 500mm Cable,,16,
+,12v Power Supply,,1,
+,micro usb to usb c cable,,1,
+,usb b cable,,1,
+,tpu finger baseplate,,1,
+,tpu grid baseplate,,1,
