@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Multi-Speaker Tactile Spatialiser - FIXED VERSION (No Double Playback + Smooth Tactile Grid)
-Complete implementation with text-based configuration files.
+Multi-Speaker Tactile Spatialiser - COMPLETE VERSION WITH DEVICE SELECTION
+Complete implementation with text-based configuration files and audio device selection.
 Default: 4x4 grid with 40mm spacing between speakers.
 CHANNELS START AT 0 AND ARE PROPERLY MAPPED.
 
@@ -11,9 +11,13 @@ FIXES APPLIED:
 - Prevented double playback issues
 - Enhanced error handling
 - FIXED: Smooth tactile grid spatialization (no more clicking/jumping)
+- ADDED: Complete audio device selection and management
 
 Usage:
   python multispeaker_main.py --config config_4x4_grid.txt
+  python multispeaker_main.py --list-devices
+  python multispeaker_main.py --device 3 --config config_4x4_grid.txt
+  python multispeaker_main.py --select-device --config config_4x4_grid.txt
   python multispeaker_main.py --create-configs
   python multispeaker_main.py script.txt  # Run tactile script with multi-speaker
 """
@@ -35,6 +39,226 @@ ild_exponent = 1.0
 current_position = np.array([0.0, 0.0])
 visualizer_callback = None
 position_lock = threading.Lock()
+
+
+# === AUDIO DEVICE MANAGEMENT ===
+def list_audio_devices():
+    """List all available audio output devices with their capabilities."""
+    print("\n=== Available Audio Output Devices ===")
+
+    try:
+        devices = sd.query_devices()
+        default_device = sd.default.device[1] if isinstance(sd.default.device, tuple) else sd.default.device
+
+        print(f"System default output device: {default_device}")
+        print(f"Total devices found: {len(devices)}")
+
+        print("\n" + "=" * 80)
+        print(f"{'ID':<3} {'Name':<45} {'Ch':<3} {'Rate':<7} {'Notes'}")
+        print("-" * 80)
+
+        suitable_devices = []
+
+        for i, device in enumerate(devices):
+            if device['max_output_channels'] > 0:
+                name = device['name'][:45]  # Truncate long names
+                channels = device['max_output_channels']
+                rate = f"{device['default_samplerate']:.0f}Hz"
+
+                # Build notes
+                notes = []
+                if i == default_device:
+                    notes.append("DEFAULT")
+
+                if channels >= 16:
+                    notes.append("16+ CH")
+                    suitable_devices.append(i)
+                elif channels >= 4:
+                    notes.append("4+ CH")
+                elif channels >= 2:
+                    notes.append("STEREO")
+
+                # Check for professional audio keywords
+                name_lower = device['name'].lower()
+                pro_keywords = ['mchstreamer', 'tdm16', 'minidsp', 'mch', 'class compliant', 'usb audio', 'focusrite',
+                                'behringer']
+                for keyword in pro_keywords:
+                    if keyword in name_lower:
+                        notes.append("PROFESSIONAL")
+                        break
+
+                notes_str = " | ".join(notes)
+                print(f"{i:<3} {name:<45} {channels:<3} {rate:<7} {notes_str}")
+
+        if suitable_devices:
+            print(f"\nDevices with 16+ channels (suitable for 4x4 grid): {suitable_devices}")
+
+        return devices
+
+    except Exception as e:
+        print(f"Error listing devices: {e}")
+        return []
+
+
+def select_audio_device_interactive(required_channels=2):
+    """Interactive device selection."""
+    devices = list_audio_devices()
+
+    if not devices:
+        return None
+
+    print(f"\nSelect audio device for {required_channels} channels:")
+
+    # Show suitable devices
+    suitable = []
+    for i, device in enumerate(devices):
+        if device['max_output_channels'] >= required_channels:
+            suitable.append(i)
+
+    if suitable:
+        print(f"Recommended devices (>= {required_channels} channels): {suitable}")
+
+    while True:
+        try:
+            choice = input(f"\nEnter device number (0-{len(devices) - 1}) or 'q' to quit: ").strip()
+
+            if choice.lower() == 'q':
+                return None
+
+            device_id = int(choice)
+
+            if 0 <= device_id < len(devices):
+                device = devices[device_id]
+
+                if device['max_output_channels'] < required_channels:
+                    print(
+                        f"Warning: Device only has {device['max_output_channels']} channels, need {required_channels}")
+                    confirm = input("Continue anyway? (y/n): ").strip().lower()
+                    if confirm != 'y':
+                        continue
+
+                print(f"Selected: {device['name']} ({device['max_output_channels']} channels)")
+                return device_id
+            else:
+                print(f"Invalid device number. Must be 0-{len(devices) - 1}")
+
+        except ValueError:
+            print("Invalid input. Enter a number or 'q'")
+        except KeyboardInterrupt:
+            return None
+
+
+def test_audio_device(device_id, channels=None, duration=2.0):
+    """Test an audio device with a simple tone."""
+    try:
+        devices = sd.query_devices()
+        if device_id >= len(devices):
+            print(f"Error: Device {device_id} not found")
+            return False
+
+        device = devices[device_id]
+        max_channels = device['max_output_channels']
+
+        if max_channels == 0:
+            print(f"Error: Device {device_id} has no output channels")
+            return False
+
+        # Determine test channels
+        if channels is None:
+            test_channels = min(max_channels, 16)  # Test up to 16 channels
+        else:
+            test_channels = min(channels, max_channels)
+
+        print(f"Testing Device {device_id}: {device['name']}")
+        print(f"Max channels: {max_channels}, Testing: {test_channels} channels")
+
+        # Generate test tone
+        sample_rate = 48000
+        t = np.linspace(0, duration, int(sample_rate * duration))
+        tone = 0.3 * np.sin(2 * np.pi * 440 * t)
+
+        # Create multi-channel buffer
+        buffer = np.zeros((len(tone), test_channels))
+        buffer[:, 0] = tone  # Left channel
+        if test_channels > 1:
+            buffer[:, 1] = 0.3 * np.sin(2 * np.pi * 880 * t)  # Right channel (higher pitch)
+
+        # Play through specified device
+        sd.play(buffer, samplerate=sample_rate, device=device_id)
+        sd.wait()
+
+        print(f"✓ Device {device_id} test completed successfully")
+        return True
+
+    except Exception as e:
+        print(f"✗ Device {device_id} test failed: {e}")
+        return False
+
+
+def find_mchstreamer_device():
+    """Try to automatically find MCHStreamer or similar multi-channel device."""
+    try:
+        devices = sd.query_devices()
+
+        # Look for devices with specific keywords and high channel counts
+        mch_keywords = ['mchstreamer', 'tdm16', 'minidsp', 'mch', 'multichannel', 'tactile']
+
+        candidates = []
+
+        for i, device in enumerate(devices):
+            if device['max_output_channels'] == 0:
+                continue
+
+            score = 0
+            reasons = []
+
+            # Perfect match: exactly 16 channels
+            if device['max_output_channels'] == 16:
+                score += 100
+                reasons.append("16 channels (perfect match)")
+
+            # Good match: high channel count
+            elif device['max_output_channels'] >= 8:
+                score += 50
+                reasons.append(f"{device['max_output_channels']} channels (multi-channel)")
+
+            # Check device name for keywords
+            name_lower = device['name'].lower()
+
+            for keyword in mch_keywords:
+                if keyword in name_lower:
+                    score += 150
+                    reasons.append(f"keyword: {keyword}")
+                    break
+
+            # Sample rate preference (48kHz is ideal)
+            if device['default_samplerate'] == 48000:
+                score += 20
+                reasons.append("48kHz sampling")
+
+            if score > 0:
+                candidates.append((score, i, device, reasons))
+
+        # Sort by score (highest first)
+        candidates.sort(reverse=True)
+
+        if not candidates:
+            print("No likely MCHStreamer/multi-channel devices found")
+            return None
+
+        print(f"Found {len(candidates)} potential candidates:")
+
+        for j, (score, device_id, device, reasons) in enumerate(candidates[:5]):  # Show top 5
+            print(f"{j + 1}. Device {device_id}: {device['name']}")
+            print(f"   Score: {score}, Channels: {device['max_output_channels']}")
+            print(f"   Reasons: {', '.join(reasons)}")
+
+        best_device_id = candidates[0][1]
+        return best_device_id
+
+    except Exception as e:
+        print(f"Error finding MCHStreamer device: {e}")
+        return None
 
 
 # === SPEAKER CONFIGURATION PARSER ===
@@ -539,9 +763,6 @@ class SpatializationEngine:
                 for idx in nearest_indices:
                     gains[idx] /= total_weight
 
-            # REMOVED: No more tactile exaggeration bias on closest speaker
-            # This was causing the uneven volume and clicking issues
-
             # Apply gentle overall tactile enhancement to all active speakers
             # This maintains tactile sensation without creating bias
             active_mask = gains > 0.001
@@ -558,33 +779,7 @@ class SpatializationEngine:
         return gains, delays
 
     def set_tactile_grid_parameters(self, **kwargs):
-        """
-        Set parameters for tactile grid spatialization to fine-tune smoothness.
-
-        Parameters:
-        - use_gaussian (bool): Use Gaussian weighting instead of inverse distance (default: False)
-        - gaussian_sigma (float): Standard deviation for Gaussian weighting in meters (default: 0.025)
-        - max_active_speakers (int): Maximum number of speakers to use simultaneously (default: 6)
-        - smooth_min_distance (float): Minimum distance for smooth transitions in meters (default: 0.008)
-        - distance_power (float): Power for distance falloff - higher = more focused (default: 1.5)
-        - tactile_enhancement (float): Overall tactile boost factor (default: 1.2)
-
-        Examples:
-        # For smoothest possible transitions (less localized but no clicks)
-        spatialiser.audio_engine.spat_engine.set_tactile_grid_parameters(
-            use_gaussian=True, gaussian_sigma=0.03
-        )
-
-        # For more focused spatialization (more localized but potentially more clicks)
-        spatialiser.audio_engine.spat_engine.set_tactile_grid_parameters(
-            max_active_speakers=4, distance_power=2.0, smooth_min_distance=0.005
-        )
-
-        # For gentler tactile enhancement
-        spatialiser.audio_engine.spat_engine.set_tactile_grid_parameters(
-            tactile_enhancement=1.1
-        )
-        """
+        """Set parameters for tactile grid spatialization to fine-tune smoothness."""
         for key, value in kwargs.items():
             if key in ['use_gaussian', 'gaussian_sigma', 'max_active_speakers',
                        'smooth_min_distance', 'distance_power', 'tactile_enhancement']:
@@ -715,9 +910,10 @@ class SpatializationEngine:
 
 # === AUDIO GENERATION ===
 class MultiSpeakerAudioEngine:
-    def __init__(self, speaker_config, sample_rate=48000):
+    def __init__(self, speaker_config, sample_rate=48000, device_id=None):
         self.config = speaker_config
         self.sample_rate = sample_rate
+        self.device_id = device_id  # Store preferred device ID
         self.spat_engine = SpatializationEngine(speaker_config)
 
         # Audio parameters
@@ -733,6 +929,8 @@ class MultiSpeakerAudioEngine:
         self.lock = threading.Lock()
 
         print(f"Audio engine initialized: {self.num_channels} channels (0-{self.num_channels - 1})")
+        if self.device_id is not None:
+            print(f"Preferred device: {self.device_id}")
 
     def set_parameters(self, **kwargs):
         """Set audio parameters."""
@@ -745,58 +943,82 @@ class MultiSpeakerAudioEngine:
                 self.spat_engine.set_parameters(**{key: value})
 
     def start_stream(self):
-        """Start the audio output stream."""
+        """Start the audio output stream with device selection."""
         with self.lock:
             if self.stream is None:
-                try:
-                    self.stream = sd.OutputStream(
-                        samplerate=self.sample_rate,
-                        channels=self.num_channels,
-                        dtype='float32',
-                        blocksize=1024
-                    )
-                    self.stream.start()
-                    print(
-                        f"Audio stream started: {self.num_channels} channels (0-{self.num_channels - 1}) at {self.sample_rate}Hz")
-                except Exception as e:
-                    print(f"Error starting audio stream: {e}")
-                    print(f"Available devices:")
-                    try:
-                        # Use the already imported sd module
-                        devices = sd.query_devices()
-                        for i, device in enumerate(devices):
-                            if device['max_output_channels'] > 0:
-                                print(f"  {i}: {device['name']} ({device['max_output_channels']} channels)")
-                    except Exception as device_error:
-                        print(f"Could not query devices: {device_error}")
+                # Try preferred device first
+                if self.device_id is not None:
+                    if self._try_device(self.device_id):
+                        return
 
-                    # Try to use a device with enough channels
-                    try:
-                        devices = sd.query_devices()
-                        suitable_device = None
-                        for i, device in enumerate(devices):
-                            if device['max_output_channels'] >= self.num_channels:
-                                suitable_device = i
-                                break
+                # Try default device
+                if self._try_device(None):
+                    return
 
-                        if suitable_device is not None:
-                            print(f"Trying device {suitable_device}: {devices[suitable_device]['name']}")
-                            self.stream = sd.OutputStream(
-                                samplerate=self.sample_rate,
-                                channels=self.num_channels,
-                                dtype='float32',
-                                blocksize=1024,
-                                device=suitable_device
-                            )
-                            self.stream.start()
-                            print(f"Audio stream started with device {suitable_device}")
-                        else:
-                            print(f"No device found with {self.num_channels} channels")
-                            print(f"Try using a configuration with fewer channels.")
-                            self.stream = None
-                    except Exception as retry_error:
-                        print(f"Retry failed: {retry_error}")
-                        self.stream = None
+                # Auto-select suitable device
+                print("Default device failed, searching for suitable device...")
+                if self._auto_select_device():
+                    return
+
+                # Final fallback
+                print("No suitable device found automatically.")
+                print("Use --list-devices to see available devices")
+                print("Use --device ID to specify a device")
+                self.stream = None
+
+    def _try_device(self, device_id):
+        """Try to start stream with specific device."""
+        try:
+            device_name = "default"
+            if device_id is not None:
+                devices = sd.query_devices()
+                if 0 <= device_id < len(devices):
+                    device_name = devices[device_id]['name']
+                else:
+                    print(f"Invalid device ID: {device_id}")
+                    return False
+
+            self.stream = sd.OutputStream(
+                samplerate=self.sample_rate,
+                channels=self.num_channels,
+                dtype='float32',
+                blocksize=1024,
+                device=device_id
+            )
+            self.stream.start()
+            print(f"✓ Audio stream started: {device_name} ({self.num_channels} channels at {self.sample_rate}Hz)")
+            return True
+
+        except Exception as e:
+            if device_id is not None:
+                print(f"✗ Device {device_id} ({device_name}) failed: {e}")
+            return False
+
+    def _auto_select_device(self):
+        """Automatically select the best available device."""
+        try:
+            devices = sd.query_devices()
+
+            # First try: exact channel match
+            for i, device in enumerate(devices):
+                if device['max_output_channels'] >= self.num_channels:
+                    print(f"Trying device {i}: {device['name']} ({device['max_output_channels']} channels)")
+                    if self._try_device(i):
+                        return True
+
+            # Second try: any multi-channel device
+            for i, device in enumerate(devices):
+                if device['max_output_channels'] >= 2:
+                    print(f"Trying fallback device {i}: {device['name']} ({device['max_output_channels']} channels)")
+                    if self._try_device(i):
+                        print(f"Warning: Using {device['max_output_channels']} channels instead of {self.num_channels}")
+                        return True
+
+            return False
+
+        except Exception as e:
+            print(f"Auto-selection failed: {e}")
+            return False
 
     def stop_stream(self):
         """Stop the audio output stream."""
@@ -854,9 +1076,6 @@ class MultiSpeakerAudioEngine:
                 # CRITICAL: Ensure we don't exceed channel count and use 0-based indexing
                 if 0 <= channel < self.num_channels:
                     output[:, channel] = tone
-                    # Debug: print active channels
-                    if gain > 0.1:  # Only print for significant activity
-                        print(f"Active: Speaker {speaker['id']} -> Channel {channel} (gain: {gain:.3f})")
                 else:
                     print(
                         f"WARNING: Speaker {speaker['id']} channel {channel} exceeds available channels (0-{self.num_channels - 1})")
@@ -915,31 +1134,32 @@ class MultiSpeakerAudioEngine:
             # Calculate gains and delays for this position
             gains, delays = self.spat_engine.calculate_gains_delays(pos)
 
+            # Apply window
+            window = np.ones(segment_length)
+            if segment_length > 100:  # Only apply fade if segment is long enough
+                fade_len = min(50, segment_length // 4)
+                ramp = 0.5 * (1 - np.cos(np.pi * np.arange(fade_len) / fade_len))
+                window[:fade_len] = ramp
+                window[-fade_len:] = ramp[::-1]
+
             # Generate tone for each channel
-            for j, speaker in enumerate(self.config.speakers):
+            for k, speaker in enumerate(self.config.speakers):
                 channel = speaker['channel']
-                gain = gains[j]
-                delay = delays[j]
+                gain = gains[k]
+                delay = delays[k]
 
-                if gain > 0.001 and 0 <= channel < self.num_channels:
-                    # Get the continuous sine wave segment
+                if gain > 0.001 and channel < self.num_channels:
+                    # Generate tone with delay
                     if delay != 0:
-                        # Apply delay by phase shifting
-                        delay_samples = int(delay * self.sample_rate)
-                        if i - delay_samples >= 0:
-                            segment_start = i - delay_samples
-                            segment_end = end_idx - delay_samples
-                            if segment_end <= N:
-                                tone_segment = amp * gain * continuous_sine[segment_start:segment_end]
-                            else:
-                                tone_segment = amp * gain * continuous_sine[i:end_idx]
-                        else:
-                            tone_segment = amp * gain * continuous_sine[i:end_idx]
+                        tone = amp * gain * np.sin(2 * np.pi * freq * (t[i:end_idx] + i / self.sample_rate - delay))
                     else:
-                        tone_segment = amp * gain * continuous_sine[i:end_idx]
+                        tone = amp * gain * np.sin(2 * np.pi * freq * (t[i:end_idx] + i / self.sample_rate))
 
-                    # Add to output buffer
-                    output[i:end_idx, channel] += tone_segment
+                    # Apply window
+                    tone *= window
+
+                    # Add to buffer
+                    output[i:end_idx, channel] += tone
 
         return output
 
@@ -1064,15 +1284,14 @@ class MultiSpeakerAudioEngine:
 
 # === MAIN INTERFACE ===
 class MultiSpeakerSpatialiser:
-    def __init__(self, config_file=None):
+    def __init__(self, config_file=None, device_id=None):
         self.speaker_config = SpeakerConfig()
 
         if config_file:
-            # FIXED: Only load config, don't create duplicate audio engine
             self.load_config(config_file)
-        else:
-            # Only create audio engine if no config file was loaded
-            self.audio_engine = MultiSpeakerAudioEngine(self.speaker_config)
+
+        # Create audio engine with device preference
+        self.audio_engine = MultiSpeakerAudioEngine(self.speaker_config, device_id=device_id)
 
         # Update global parameters for compatibility
         global sample_rate, tone_duration, itd_exaggeration, ild_exponent
@@ -1087,12 +1306,13 @@ class MultiSpeakerSpatialiser:
         """Load configuration from file."""
         success = self.speaker_config.load_from_file(config_file)
         if success:
-            # FIXED: Stop any existing audio engine first
+            # Preserve device_id when reloading
+            device_id = getattr(self.audio_engine, 'device_id', None) if hasattr(self, 'audio_engine') else None
+
             if hasattr(self, 'audio_engine') and self.audio_engine:
                 self.audio_engine.stop_stream()
 
-            # Create new audio engine with new config
-            self.audio_engine = MultiSpeakerAudioEngine(self.speaker_config)
+            self.audio_engine = MultiSpeakerAudioEngine(self.speaker_config, device_id=device_id)
             print(f"Loaded configuration from {config_file}")
         return success
 
@@ -1133,6 +1353,8 @@ class MultiSpeakerSpatialiser:
         print(f"  Speakers: {len(self.speaker_config.speakers)}")
         print(f"  Channels: {self.audio_engine.num_channels} (0-based: 0 to {self.audio_engine.num_channels - 1})")
         print(f"  Method: {self.speaker_config.method}")
+        if self.audio_engine.device_id is not None:
+            print(f"  Audio Device: {self.audio_engine.device_id}")
         if self.speaker_config.speakers:
             positions = self.speaker_config.get_speaker_positions()
             x_range = np.ptp(positions[:, 0]) * 1000  # Convert to mm
@@ -1462,7 +1684,7 @@ def parse_script(lines):
 
 def execute(actions, with_visualization=False):
     """Execute a sequence of parsed actions."""
-    # FIXED: Use existing spatialiser if available, otherwise create one with warning
+    # Use existing spatialiser if available, otherwise create one with warning
     if hasattr(generate_tactile_tone, 'spatialiser') and generate_tactile_tone.spatialiser:
         spatialiser = generate_tactile_tone.spatialiser
         print("Using existing spatialiser configuration")
@@ -1471,7 +1693,7 @@ def execute(actions, with_visualization=False):
         spatialiser = MultiSpeakerSpatialiser()
         generate_tactile_tone.spatialiser = spatialiser
 
-    # FIXED: Make sure we're not starting multiple streams
+    # Make sure we're not starting multiple streams
     if spatialiser.audio_engine.stream is None:
         spatialiser.start()
 
@@ -1708,7 +1930,6 @@ def execute(actions, with_visualization=False):
                     time.sleep(duration)
 
     # Note: Don't automatically stop the spatialiser here to allow for reuse
-    # spatialiser.stop()
 
 
 def execute_with_visualization(actions):
@@ -1836,30 +2057,65 @@ SPEAKER BR  0.02,-0.02 CHANNEL=3 DESCRIPTION="Bottom right"
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Multi-Speaker Spatialiser')
+    parser = argparse.ArgumentParser(description='Multi-Speaker Spatialiser with Device Selection')
     parser.add_argument('script', nargs='?', help='Tactile script file to execute')
     parser.add_argument('--config', help='Speaker configuration file')
-    parser.add_argument('--create-configs', action='store_true',
-                        help='Create example configuration files')
-    parser.add_argument('--info', action='store_true',
-                        help='Show configuration info and exit')
-    parser.add_argument('--interactive', action='store_true',
-                        help='Enter interactive mode')
-    parser.add_argument('--visualize', '-v', action='store_true',
-                        help='Launch with visualization')
+    parser.add_argument('--device', type=int, help='Audio device ID (use --list-devices to see options)')
+    parser.add_argument('--list-devices', action='store_true', help='List available audio devices and exit')
+    parser.add_argument('--select-device', action='store_true', help='Interactively select audio device')
+    parser.add_argument('--find-device', action='store_true', help='Auto-find MCHStreamer or similar device')
+    parser.add_argument('--test-device', type=int, help='Test specific device ID')
+    parser.add_argument('--create-configs', action='store_true', help='Create example configuration files')
+    parser.add_argument('--info', action='store_true', help='Show configuration info and exit')
+    parser.add_argument('--interactive', action='store_true', help='Enter interactive mode')
+    parser.add_argument('--visualize', '-v', action='store_true', help='Launch with visualization')
 
     args = parser.parse_args()
+
+    # Handle device listing
+    if args.list_devices:
+        list_audio_devices()
+        exit(0)
+
+    # Handle device testing
+    if args.test_device is not None:
+        test_audio_device(args.test_device)
+        exit(0)
+
+    # Handle device finding
+    if args.find_device:
+        device = find_mchstreamer_device()
+        if device is not None:
+            print(f"Found potential MCHStreamer device: {device}")
+            print(f"To use: python multispeaker_main.py --device {device}")
+        exit(0)
+
+    # Handle device selection
+    device_id = args.device
+    if args.select_device:
+        # Determine required channels from config
+        if args.config:
+            temp_config = SpeakerConfig()
+            temp_config.load_from_file(args.config)
+            required_channels = temp_config.get_num_channels()
+        else:
+            required_channels = 16  # Default for 4x4 grid
+
+        device_id = select_audio_device_interactive(required_channels)
+        if device_id is None:
+            print("No device selected, exiting.")
+            exit(0)
 
     if args.create_configs:
         create_example_configs()
     elif args.info:
-        spatialiser = MultiSpeakerSpatialiser(args.config)
+        spatialiser = MultiSpeakerSpatialiser(args.config, device_id)
         spatialiser.print_info()
     elif args.script:
         # Execute a tactile script
-        spatialiser = MultiSpeakerSpatialiser(args.config)
+        spatialiser = MultiSpeakerSpatialiser(args.config, device_id)
 
-        # FIXED: Set the global spatialiser BEFORE any execute calls
+        # Set the global spatialiser BEFORE any execute calls
         generate_tactile_tone.spatialiser = spatialiser
 
         if args.visualize:
@@ -1876,6 +2132,7 @@ if __name__ == "__main__":
                 print("Launching visualizer to handle script execution...")
                 print(f"Script: {args.script}")
                 print(f"Config: {args.config if args.config else 'default'}")
+                print(f"Device: {device_id if device_id is not None else 'auto'}")
                 print("The visualizer will execute the script. Close the visualizer window to stop.")
 
                 # Wait for the visualizer process to complete
@@ -1895,9 +2152,6 @@ if __name__ == "__main__":
                 except Exception as fallback_error:
                     print(f"Fallback execution failed: {fallback_error}")
 
-            # FIXED: Don't execute the script again in main process when using visualizer
-            # The visualizer process handles all execution
-
         else:
             # Non-visualized execution
             try:
@@ -1908,13 +2162,15 @@ if __name__ == "__main__":
                 print(f"Executing script: {args.script}")
                 print(f"Actions: {len(actions)}")
                 print(f"Using configuration: {spatialiser.speaker_config.config_name}")
+                if device_id is not None:
+                    print(f"Using audio device: {device_id}")
 
                 execute(actions)
 
             except Exception as e:
                 print(f"Error executing script: {e}")
             finally:
-                # FIXED: Cleanup after execution
+                # Cleanup after execution
                 try:
                     spatialiser.stop()
                 except:
@@ -1922,20 +2178,26 @@ if __name__ == "__main__":
 
     elif args.interactive:
         # Interactive mode
-        spatialiser = MultiSpeakerSpatialiser(args.config)
+        spatialiser = MultiSpeakerSpatialiser(args.config, device_id)
         spatialiser.start()
 
         print("\nCommands:")
-        print("  play x y freq amp  - Play sound at position (meters)")
-        print("  load filename      - Load configuration file")
-        print("  save filename      - Save configuration file")
-        print("  info              - Show speaker info")
-        print("  smooth            - Configure smooth tactile grid")
-        print("  help              - Show this help")
-        print("  quit              - Exit")
+        print("  play x y freq amp     - Play sound at position (meters)")
+        print("  load filename         - Load configuration file")
+        print("  save filename         - Save configuration file")
+        print("  info                  - Show speaker info")
+        print("  devices               - List audio devices")
+        print("  device ID             - Switch to audio device ID")
+        print("  test-device ID        - Test audio device ID")
+        print("  find-device           - Auto-find MCHStreamer device")
+        print("  smooth                - Configure smooth tactile grid")
+        print("  help                  - Show this help")
+        print("  quit                  - Exit")
         print("\nExample: play 0.02 0.02 440 0.5  (20mm, 20mm)")
         print("NOTE: All channels are 0-based (first channel is 0, not 1)")
-        print("FIXED: Smooth tactile grid spatialization (no more clicking/jumping)")
+        print("IMPROVED: Smooth tactile grid spatialization (no more clicking/jumping)")
+        if device_id is not None:
+            print(f"Using audio device: {device_id}")
 
         try:
             while True:
@@ -1957,6 +2219,41 @@ if __name__ == "__main__":
                     spatialiser.save_config(cmd[1])
                 elif cmd[0] == 'info':
                     spatialiser.print_info()
+                elif cmd[0] == 'devices':
+                    list_audio_devices()
+                elif cmd[0] == 'device' and len(cmd) > 1:
+                    try:
+                        new_device_id = int(cmd[1])
+                        # Stop current stream
+                        spatialiser.stop()
+                        # Update device ID
+                        spatialiser.audio_engine.device_id = new_device_id
+                        # Restart with new device
+                        spatialiser.start()
+                        print(f"Switched to audio device {new_device_id}")
+                    except ValueError:
+                        print("Invalid device ID")
+                    except Exception as e:
+                        print(f"Error switching device: {e}")
+                elif cmd[0] == 'test-device' and len(cmd) > 1:
+                    try:
+                        test_device_id = int(cmd[1])
+                        test_audio_device(test_device_id)
+                    except ValueError:
+                        print("Invalid device ID")
+                elif cmd[0] == 'find-device':
+                    found_device = find_mchstreamer_device()
+                    if found_device is not None:
+                        print(f"Found potential device: {found_device}")
+                        use_it = input(f"Switch to device {found_device}? (y/n): ").strip().lower()
+                        if use_it == 'y':
+                            try:
+                                spatialiser.stop()
+                                spatialiser.audio_engine.device_id = found_device
+                                spatialiser.start()
+                                print(f"Switched to device {found_device}")
+                            except Exception as e:
+                                print(f"Error switching to device {found_device}: {e}")
                 elif cmd[0] == 'smooth':
                     print("Tactile Grid Smoothness Options:")
                     print("1. Default (improved smoothness)")
@@ -2011,11 +2308,18 @@ if __name__ == "__main__":
                     print("  load filename         - Load speaker configuration")
                     print("  save filename         - Save current configuration")
                     print("  info                  - Show detailed speaker info")
+                    print("  devices               - List available audio devices")
+                    print("  device ID             - Switch to audio device ID")
+                    print("  test-device ID        - Test audio device ID")
+                    print("  find-device           - Auto-find MCHStreamer device")
                     print("  smooth                - Configure tactile grid smoothness")
                     print("  quit                  - Exit program")
                     print("\nExamples:")
                     print("  play 0.02 0.02 440 0.5   # 20mm right, 20mm forward")
                     print("  play -0.02 -0.02 220 0.3 # 20mm left, 20mm back")
+                    print("  device 3                 # Switch to audio device 3")
+                    print("  test-device 5            # Test audio device 5")
+                    print("  find-device              # Auto-find MCHStreamer")
                     print("\nIMPORTANT: All channels are 0-based!")
                     print("IMPROVED: Smooth tactile transitions (no more clicking)")
                 else:
@@ -2032,13 +2336,15 @@ if __name__ == "__main__":
             print("Creating default configuration files...")
             create_example_configs()
 
-        spatialiser = MultiSpeakerSpatialiser('config_4x4_grid.txt')
+        spatialiser = MultiSpeakerSpatialiser('config_4x4_grid.txt', device_id)
         spatialiser.start()
 
         print("\nDemonstrating 4x4 grid with 40mm spacing:")
         print("Playing sounds at the four corners and center...")
         print("Channels are 0-based (first channel = 0)")
         print("IMPROVED: Smooth tactile spatialization!")
+        if device_id is not None:
+            print(f"Using audio device: {device_id}")
 
         # Demo the 4x4 grid
         positions = [
@@ -2063,5 +2369,7 @@ if __name__ == "__main__":
 
         spatialiser.stop()
         print("\nDemo complete. Use --interactive for interactive mode.")
+        print("Use --list-devices to see available audio devices.")
+        print("Use --device ID to specify an audio device.")
         print("Remember: All channels are 0-based!")
         print("IMPROVED: Smooth tactile spatialization eliminates clicking/jumping!")
