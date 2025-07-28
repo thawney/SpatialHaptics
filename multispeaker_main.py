@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
 """
-Multi-Speaker Tactile Spatialiser - COMPLETE VERSION WITH DEVICE SELECTION
-Complete implementation with text-based configuration files and audio device selection.
+Multi-Speaker Tactile Spatialiser - COMPLETE VERSION WITH FIXED DEVICE SELECTION
+Complete implementation with text-based configuration files and strict audio device selection.
 Default: 4x4 grid with 40mm spacing between speakers.
 CHANNELS START AT 0 AND ARE PROPERLY MAPPED.
 
 FIXES APPLIED:
-- Fixed double audio engine creation
-- Added proper stream cleanup
-- Prevented double playback issues
-- Enhanced error handling
+- FIXED: Strict device selection (no fallback when user specifies device)
+- FIXED: Proper device ID passing to visualizer
+- FIXED: Better error handling and validation
 - FIXED: Smooth tactile grid spatialization (no more clicking/jumping)
 - ADDED: Complete audio device selection and management
 
 Usage:
   python multispeaker_main.py --config config_4x4_grid.txt
   python multispeaker_main.py --list-devices
-  python multispeaker_main.py --device 3 --config config_4x4_grid.txt
+  python multispeaker_main.py --device 60 --config config_4x4_grid.txt
   python multispeaker_main.py --select-device --config config_4x4_grid.txt
   python multispeaker_main.py --create-configs
   python multispeaker_main.py script.txt  # Run tactile script with multi-speaker
@@ -916,6 +915,9 @@ class MultiSpeakerAudioEngine:
         self.device_id = device_id  # Store preferred device ID
         self.spat_engine = SpatializationEngine(speaker_config)
 
+        # Track if user specified a device (for strict enforcement)
+        self._user_specified_device = device_id is not None
+
         # Audio parameters
         self.tone_duration = 0.1
         self.fade_duration = 0.05
@@ -930,7 +932,42 @@ class MultiSpeakerAudioEngine:
 
         print(f"Audio engine initialized: {self.num_channels} channels (0-{self.num_channels - 1})")
         if self.device_id is not None:
-            print(f"Preferred device: {self.device_id}")
+            print(f"User-specified device: {self.device_id} (strict mode)")
+        else:
+            print("No device specified, will auto-select suitable device")
+
+    def validate_device_selection(self):
+        """Validate that the specified device exists and has enough channels."""
+        if self.device_id is None:
+            return True  # Auto-selection will handle this
+
+        try:
+            devices = sd.query_devices()
+
+            if self.device_id >= len(devices) or self.device_id < 0:
+                print(f"ERROR: Device {self.device_id} does not exist (valid range: 0-{len(devices) - 1})")
+                return False
+
+            device = devices[self.device_id]
+
+            if device['max_output_channels'] == 0:
+                print(f"ERROR: Device {self.device_id} ({device['name']}) is not an output device")
+                return False
+
+            if device['max_output_channels'] < self.num_channels:
+                print(
+                    f"WARNING: Device {self.device_id} ({device['name']}) only has {device['max_output_channels']} channels")
+                print(f"Your configuration needs {self.num_channels} channels")
+                response = input("Continue anyway? (y/n): ").strip().lower()
+                if response != 'y':
+                    return False
+
+            print(f"Device {self.device_id} validated: {device['name']} ({device['max_output_channels']} channels)")
+            return True
+
+        except Exception as e:
+            print(f"ERROR: Cannot validate device {self.device_id}: {e}")
+            return False
 
     def set_parameters(self, **kwargs):
         """Set audio parameters."""
@@ -943,41 +980,89 @@ class MultiSpeakerAudioEngine:
                 self.spat_engine.set_parameters(**{key: value})
 
     def start_stream(self):
-        """Start the audio output stream with device selection."""
+        """Start the audio output stream with STRICT device selection - FIXED VERSION."""
         with self.lock:
             if self.stream is None:
-                # Try preferred device first
+                # If user specified a device, ONLY try that device
                 if self.device_id is not None:
+                    print(f"Attempting to use specified device {self.device_id}...")
                     if self._try_device(self.device_id):
                         return
+                    else:
+                        # User's device failed - don't fallback, tell them
+                        print(f"ERROR: Cannot use specified device {self.device_id}")
+                        print("Use --list-devices to see available devices")
+                        print("Use --test-device ID to test a specific device")
+                        print("Use --select-device for interactive selection")
+                        self.stream = None
+                        return
 
-                # Try default device
+                # No device specified by user - try defaults and auto-select
+                print("No device specified, trying default device...")
                 if self._try_device(None):
                     return
 
-                # Auto-select suitable device
+                # Default failed, auto-select suitable device
                 print("Default device failed, searching for suitable device...")
                 if self._auto_select_device():
                     return
 
-                # Final fallback
-                print("No suitable device found automatically.")
+                # Complete failure
+                print("No suitable audio device found.")
                 print("Use --list-devices to see available devices")
                 print("Use --device ID to specify a device")
                 self.stream = None
 
+    # SIMPLE FIX: Add this method to MultiSpeakerAudioEngine class in multispeaker_main.py
+
     def _try_device(self, device_id):
-        """Try to start stream with specific device."""
+        """Try to start stream with specific device - MCHSTREAMER WINDOWS FIX."""
         try:
             device_name = "default"
             if device_id is not None:
                 devices = sd.query_devices()
                 if 0 <= device_id < len(devices):
-                    device_name = devices[device_id]['name']
+                    device = devices[device_id]
+                    device_name = device['name']
+                    available_channels = device['max_output_channels']
+
+                    # MCHSTREAMER FIX: Try WASAPI for MCHStreamer devices
+                    if 'mchstreamer' in device_name.lower() or 'mch' in device_name.lower():
+                        print(f"MCHStreamer device detected, trying WASAPI API...")
+                        try:
+                            # Find WASAPI host API
+                            host_apis = sd.query_hostapis()
+                            wasapi_hostapi = None
+                            for i, api in enumerate(host_apis):
+                                if 'WASAPI' in api['name']:
+                                    wasapi_hostapi = i
+                                    break
+
+                            if wasapi_hostapi is not None:
+                                self.stream = sd.OutputStream(
+                                    samplerate=self.sample_rate,
+                                    channels=self.num_channels,
+                                    dtype='float32',
+                                    blocksize=1024,
+                                    device=device_id,
+                                    hostapi=wasapi_hostapi  # Force WASAPI
+                                )
+                                self.stream.start()
+                                print(
+                                    f"✓ MCHStreamer WASAPI: {device_name} ({self.num_channels} channels at {self.sample_rate}Hz)")
+                                return True
+                        except Exception as wasapi_error:
+                            print(f"WASAPI failed: {wasapi_error}, trying default...")
+
+                    # Check if device has enough channels
+                    if available_channels < self.num_channels:
+                        print(
+                            f"WARNING: Device {device_id} ({device_name}) only has {available_channels} channels, need {self.num_channels}")
                 else:
-                    print(f"Invalid device ID: {device_id}")
+                    print(f"ERROR: Invalid device ID {device_id} (valid range: 0-{len(devices) - 1})")
                     return False
 
+            # Default method
             self.stream = sd.OutputStream(
                 samplerate=self.sample_rate,
                 channels=self.num_channels,
@@ -992,24 +1077,36 @@ class MultiSpeakerAudioEngine:
         except Exception as e:
             if device_id is not None:
                 print(f"✗ Device {device_id} ({device_name}) failed: {e}")
+
+                # MCHSTREAMER HELPFUL MESSAGE
+                if 'mchstreamer' in device_name.lower() and 'WDM-KS' in str(e):
+                    print(f"💡 MCHStreamer Windows fix: Try using device 11 instead")
+                    print(f"   Command: python multispeaker_main.py --device 11")
+            else:
+                print(f"✗ Default device failed: {e}")
             return False
 
     def _auto_select_device(self):
-        """Automatically select the best available device."""
+        """Automatically select the best available device - ONLY if no device was specified by user."""
+        # If user specified a device, we should NEVER auto-select
+        if self._user_specified_device:
+            return False
+
         try:
             devices = sd.query_devices()
 
             # First try: exact channel match
             for i, device in enumerate(devices):
                 if device['max_output_channels'] >= self.num_channels:
-                    print(f"Trying device {i}: {device['name']} ({device['max_output_channels']} channels)")
+                    print(f"Auto-trying device {i}: {device['name']} ({device['max_output_channels']} channels)")
                     if self._try_device(i):
                         return True
 
             # Second try: any multi-channel device
             for i, device in enumerate(devices):
                 if device['max_output_channels'] >= 2:
-                    print(f"Trying fallback device {i}: {device['name']} ({device['max_output_channels']} channels)")
+                    print(
+                        f"Auto-trying fallback device {i}: {device['name']} ({device['max_output_channels']} channels)")
                     if self._try_device(i):
                         print(f"Warning: Using {device['max_output_channels']} channels instead of {self.num_channels}")
                         return True
@@ -2057,7 +2154,7 @@ SPEAKER BR  0.02,-0.02 CHANNEL=3 DESCRIPTION="Bottom right"
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Multi-Speaker Spatialiser with Device Selection')
+    parser = argparse.ArgumentParser(description='Multi-Speaker Spatialiser with FIXED Device Selection')
     parser.add_argument('script', nargs='?', help='Tactile script file to execute')
     parser.add_argument('--config', help='Speaker configuration file')
     parser.add_argument('--device', type=int, help='Audio device ID (use --list-devices to see options)')
@@ -2119,7 +2216,7 @@ if __name__ == "__main__":
         generate_tactile_tone.spatialiser = spatialiser
 
         if args.visualize:
-            # Launch the visualizer and let IT handle execution
+            # Launch the visualizer and let IT handle execution - FIXED DEVICE PASSING
             import subprocess
             import sys
 
@@ -2128,6 +2225,10 @@ if __name__ == "__main__":
                 cmd = [sys.executable, visualizer_script, args.script]
                 if args.config:
                     cmd.extend(['--config', args.config])
+
+                # FIXED: Pass device ID to visualizer
+                if device_id is not None:
+                    cmd.extend(['--device', str(device_id)])
 
                 print("Launching visualizer to handle script execution...")
                 print(f"Script: {args.script}")
@@ -2228,6 +2329,7 @@ if __name__ == "__main__":
                         spatialiser.stop()
                         # Update device ID
                         spatialiser.audio_engine.device_id = new_device_id
+                        spatialiser.audio_engine._user_specified_device = True
                         # Restart with new device
                         spatialiser.start()
                         print(f"Switched to audio device {new_device_id}")
@@ -2250,6 +2352,7 @@ if __name__ == "__main__":
                             try:
                                 spatialiser.stop()
                                 spatialiser.audio_engine.device_id = found_device
+                                spatialiser.audio_engine._user_specified_device = True
                                 spatialiser.start()
                                 print(f"Switched to device {found_device}")
                             except Exception as e:
@@ -2317,11 +2420,12 @@ if __name__ == "__main__":
                     print("\nExamples:")
                     print("  play 0.02 0.02 440 0.5   # 20mm right, 20mm forward")
                     print("  play -0.02 -0.02 220 0.3 # 20mm left, 20mm back")
-                    print("  device 3                 # Switch to audio device 3")
+                    print("  device 60                # Switch to audio device 60")
                     print("  test-device 5            # Test audio device 5")
                     print("  find-device              # Auto-find MCHStreamer")
                     print("\nIMPORTANT: All channels are 0-based!")
                     print("IMPROVED: Smooth tactile transitions (no more clicking)")
+                    print("FIXED: Strict device selection - only uses your specified device!")
                 else:
                     print("Invalid command. Type 'help' for help.")
 
@@ -2343,6 +2447,7 @@ if __name__ == "__main__":
         print("Playing sounds at the four corners and center...")
         print("Channels are 0-based (first channel = 0)")
         print("IMPROVED: Smooth tactile spatialization!")
+        print("FIXED: Strict device selection!")
         if device_id is not None:
             print(f"Using audio device: {device_id}")
 
@@ -2373,3 +2478,4 @@ if __name__ == "__main__":
         print("Use --device ID to specify an audio device.")
         print("Remember: All channels are 0-based!")
         print("IMPROVED: Smooth tactile spatialization eliminates clicking/jumping!")
+        print("FIXED: Device selection now strictly enforced - no fallback!")

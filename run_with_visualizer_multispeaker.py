@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """
-Multi-Speaker Tactile Spatialiser with Visualization - FIXED VERSION
+Multi-Speaker Tactile Spatialiser with Visualization - FIXED DEVICE SELECTION
 Run this script to execute a tactile script with real-time visualization.
 
 FIXES APPLIED:
-- Proper spatialiser management
+- Proper device ID passing from main script to visualizer
 - No double execution issues
 - Better error handling
+- User's device selection is respected
+- Strict device enforcement (no fallback)
 
 Usage:
   python run_with_visualizer_multispeaker.py script_file.txt
   python run_with_visualizer_multispeaker.py script_file.txt --config config_4x4_grid.txt
+  python run_with_visualizer_multispeaker.py script_file.txt --config config_4x4_grid.txt --device 60
 """
 import os
 import sys
@@ -33,6 +36,7 @@ def main_cli():
     parser = argparse.ArgumentParser(description='Run Multi-Speaker Spatialiser with visualization')
     parser.add_argument('script', nargs='?', help='Path to script file')
     parser.add_argument('--config', help='Speaker configuration file')
+    parser.add_argument('--device', type=int, help='Audio device ID to use')
     args = parser.parse_args()
 
     # Prompt if missing
@@ -45,21 +49,36 @@ def main_cli():
     print("=" * 60)
     print(f"Script: {script_path}")
     print(f"Config: {args.config if args.config else 'default 4x4 grid'}")
-    print("FIXED: No double playback issues!")
+    if args.device is not None:
+        print(f"Device: {args.device} (STRICT MODE - no fallback)")
+    else:
+        print("Device: Auto-select (will try to find suitable device)")
+    print("FIXED: Device selection now properly passed to visualizer!")
+    print("FIXED: No more fallback to wrong devices!")
     print("=" * 60)
 
-    # Initialize spatialiser with proper configuration
+    # Initialize spatialiser with proper device ID passing - FIXED!
     print("Initializing spatialiser...")
-    spatialiser = main.MultiSpeakerSpatialiser(args.config)
+    try:
+        spatialiser = main.MultiSpeakerSpatialiser(args.config, device_id=args.device)
 
-    # Set up the callback for visualization
-    main.set_visualizer_callback(position_callback)
+        # Set up the callback for visualization
+        main.set_visualizer_callback(position_callback)
 
-    # CRITICAL: Set the global spatialiser to prevent double creation
-    main.generate_tactile_tone.spatialiser = spatialiser
-    print(f"Using configuration: {spatialiser.speaker_config.config_name}")
-    print(f"Speakers: {len(spatialiser.speaker_config.speakers)}")
-    print(f"Channels: {spatialiser.audio_engine.num_channels}")
+        # CRITICAL: Set the global spatialiser to prevent double creation
+        main.generate_tactile_tone.spatialiser = spatialiser
+        print(f"Using configuration: {spatialiser.speaker_config.config_name}")
+        print(f"Speakers: {len(spatialiser.speaker_config.speakers)}")
+        print(f"Channels: {spatialiser.audio_engine.num_channels}")
+        if args.device is not None:
+            print(f"Requested device: {args.device} (strict mode)")
+
+    except Exception as e:
+        print(f"ERROR: Failed to initialize spatialiser: {e}")
+        if args.device is not None:
+            print(f"Cannot use device {args.device}. Use --list-devices to see available devices.")
+            print(f"Use --test-device {args.device} to test this specific device.")
+        return
 
     # Import visualizer module - will start pygame
     try:
