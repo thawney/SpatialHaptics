@@ -1016,7 +1016,7 @@ class MultiSpeakerAudioEngine:
     # SIMPLE FIX: Add this method to MultiSpeakerAudioEngine class in multispeaker_main.py
 
     def _try_device(self, device_id):
-        """Try to start stream with specific device - MCHSTREAMER WINDOWS FIX."""
+        """Try to start stream with specific device - uses WASAPI exclusive mode for direct multi-channel access on Windows."""
         try:
             device_name = "default"
             if device_id is not None:
@@ -1026,9 +1026,10 @@ class MultiSpeakerAudioEngine:
                     device_name = device['name']
                     available_channels = device['max_output_channels']
 
-                    # MCHSTREAMER FIX: Try WASAPI for MCHStreamer devices
-                    if 'mchstreamer' in device_name.lower() or 'mch' in device_name.lower():
-                        print(f"MCHStreamer device detected, trying WASAPI API...")
+                    # WINDOWS MULTI-CHANNEL FIX: Try WASAPI exclusive mode for all multi-channel devices
+                    # This allows direct access to all channels, bypassing Windows audio mode restrictions
+                    if available_channels > 2:  # Any multi-channel device
+                        print(f"Multi-channel device detected ({available_channels} channels), trying WASAPI exclusive mode...")
                         try:
                             # Find WASAPI host API
                             host_apis = sd.query_hostapis()
@@ -1039,20 +1040,45 @@ class MultiSpeakerAudioEngine:
                                     break
 
                             if wasapi_hostapi is not None:
-                                self.stream = sd.OutputStream(
-                                    samplerate=self.sample_rate,
-                                    channels=self.num_channels,
-                                    dtype='float32',
-                                    blocksize=1024,
-                                    device=device_id,
-                                    hostapi=wasapi_hostapi  # Force WASAPI
-                                )
-                                self.stream.start()
-                                print(
-                                    f"✓ MCHStreamer WASAPI: {device_name} ({self.num_channels} channels at {self.sample_rate}Hz)")
-                                return True
+                                # Try WASAPI exclusive mode first for direct channel access
+                                try:
+                                    print(f"  Attempting WASAPI exclusive mode for {self.num_channels} channels...")
+                                    self.stream = sd.OutputStream(
+                                        samplerate=self.sample_rate,
+                                        channels=self.num_channels,
+                                        dtype='float32',
+                                        blocksize=1024,
+                                        device=device_id,
+                                        hostapi=wasapi_hostapi,
+                                        extra_settings=sd.WasapiSettings(exclusive=True)
+                                    )
+                                    self.stream.start()
+                                    print(
+                                        f"✓ WASAPI exclusive mode: {device_name} ({self.num_channels} channels at {self.sample_rate}Hz)")
+                                    print(f"  Direct channel access enabled - bypassing Windows audio mode restrictions")
+                                    return True
+                                except Exception as exclusive_error:
+                                    print(f"  Exclusive mode failed: {exclusive_error}")
+                                    print(f"  Trying WASAPI shared mode...")
+
+                                    # Fall back to WASAPI shared mode
+                                    try:
+                                        self.stream = sd.OutputStream(
+                                            samplerate=self.sample_rate,
+                                            channels=self.num_channels,
+                                            dtype='float32',
+                                            blocksize=1024,
+                                            device=device_id,
+                                            hostapi=wasapi_hostapi
+                                        )
+                                        self.stream.start()
+                                        print(
+                                            f"✓ WASAPI shared mode: {device_name} ({self.num_channels} channels at {self.sample_rate}Hz)")
+                                        return True
+                                    except Exception as shared_error:
+                                        print(f"  Shared mode also failed: {shared_error}")
                         except Exception as wasapi_error:
-                            print(f"WASAPI failed: {wasapi_error}, trying default...")
+                            print(f"WASAPI setup failed: {wasapi_error}, trying default...")
 
                     # Check if device has enough channels
                     if available_channels < self.num_channels:
@@ -1078,10 +1104,14 @@ class MultiSpeakerAudioEngine:
             if device_id is not None:
                 print(f"✗ Device {device_id} ({device_name}) failed: {e}")
 
-                # MCHSTREAMER HELPFUL MESSAGE
-                if 'mchstreamer' in device_name.lower() and 'WDM-KS' in str(e):
-                    print(f"💡 MCHStreamer Windows fix: Try using device 11 instead")
-                    print(f"   Command: python multispeaker_main.py --device 11")
+                # WINDOWS MULTI-CHANNEL HELPFUL MESSAGE
+                if available_channels > 2:
+                    print(f"💡 Multi-channel device troubleshooting:")
+                    print(f"   - WASAPI exclusive mode provides direct channel access")
+                    print(f"   - Make sure no other application is using the device")
+                    print(f"   - Try running: python multispeaker_main.py --list to see all available devices")
+                    if 'WDM-KS' in str(e):
+                        print(f"   - WDM-KS driver may not support exclusive mode, try a different device entry")
             else:
                 print(f"✗ Default device failed: {e}")
             return False

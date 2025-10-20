@@ -49,7 +49,9 @@ If using other audio interfaces:
 
 ## Software Configuration
 
-The system automatically detects and configures for Thawney's driver board. It appears as a standard class compliant USB audio device. If you are on windows you will need to install the minidsp driver provided and make sure your windows sound setup is aware it is a 16 channel device, otherwise it may treat it as stereo.
+The system automatically detects and configures for Thawney's driver board. It appears as a standard class compliant USB audio device.
+
+**Windows Multi-Channel Support**: The software now uses WASAPI exclusive mode for direct access to all audio channels, bypassing Windows audio mode restrictions (stereo/5.1). This means you can access all 16 channels regardless of your Windows speaker configuration settings. Make sure no other application is using the audio device when running in exclusive mode.
 
 ### Testing Your Setup
 
